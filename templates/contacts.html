@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Контакти | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1>Контакти</h1>
+
+        <p>
+            Зверніться до менеджера, щоб уточнити асортимент,
+            вартість, строки виготовлення та умови отримання продукції.
+        </p>
+
+        <div class="contacts-grid">
+            <div class="contact-details">
+                <h2>Зв’яжіться з нами</h2>
+
+                <h3>Телефон</h3>
+                <p>
+                    <a href="tel:+380485361446">
+                        +380 48 536 14 46
+                    </a>
+                </p>
+
+                <h3>Електронна пошта</h3>
+                <p>
+                    <a href="mailto:rkcvk.rozdilna@gmail.com">
+                        rkcvk.rozdilna@gmail.com
+                    </a>
+                </p>
+
+                <h3>Адреса</h3>
+                <p>м. Роздільна, вул. Понятівська, 28</p>
+
+                <h3>Години для звернень</h3>
+                <p>Щодня, 09:00–18:00</p>
+
+                <a
+                    class="text-link"
+                    href="https://www.google.com/maps/search/?api=1&query=Роздільна,+Понятівська,+28"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Відкрити в Google Maps →
+                </a>
+            </div>
+
+            <div class="contact-map">
+                <iframe
+                    title="Карта пошуку адреси: Роздільна, Понятівська, 28"
+                    src="https://maps.google.com/maps?q=Роздільна,+Понятівська,+28&output=embed&hl=uk"
+                    width="600"
+                    height="400"
+                    style="border: 0;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    allowfullscreen
+                ></iframe>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
