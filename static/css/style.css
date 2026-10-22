@@ -1,0 +1,415 @@
+:root {
+    --cream: #fff8ed;
+    --light: #f5ead8;
+    --burgundy: #750d16;
+    --burgundy-dark: #540810;
+    --gold: #c79838;
+    --text: #382822;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+    background: var(--cream);
+    line-height: 1.6;
+}
+
+main {
+    flex: 1;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 5px;
+}
+
+.container {
+    width: min(1200px, 92%);
+    margin-inline: auto;
+}
+
+h1,
+h2 {
+    margin: 0 0 20px;
+    color: var(--burgundy);
+    font-family: Georgia, serif;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: clamp(28px, 4vw, 42px);
+}
+
+h2 {
+    font-size: clamp(25px, 3vw, 34px);
+}
+
+p {
+    margin: 0 0 18px;
+}
+
+/* Шапка */
+
+.site-header {
+    background: var(--cream);
+    border-bottom: 2px solid var(--gold);
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 14px;
+}
+
+.brand {
+    flex-shrink: 0;
+}
+
+.brand-logo {
+    width: 90px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.main-navigation,
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.main-navigation a,
+.header-actions a {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.main-navigation a:hover,
+.header-actions a:hover {
+    color: var(--burgundy);
+}
+
+.cart-link {
+    padding: 10px 16px;
+    border: 1px solid var(--burgundy);
+    border-radius: 6px;
+}
+
+.menu-toggle {
+    display: none;
+    padding: 8px 16px;
+    color: var(--burgundy);
+    background: transparent;
+    border: 1px solid var(--burgundy);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Банер і кнопки */
+
+.hero-banner {
+    width: 100%;
+    height: auto;
+}
+
+.hero-actions {
+    padding-block: 24px;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    padding: 13px 26px;
+    color: white;
+    background: var(--burgundy);
+    border: 1px solid var(--burgundy);
+    border-radius: 6px;
+    font-weight: 600;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background: var(--burgundy-dark);
+}
+
+.text-link {
+    color: var(--burgundy);
+    font-weight: 600;
+}
+
+.text-link:hover {
+    text-decoration: underline;
+}
+
+/* Розділи головної */
+
+.section {
+    padding-block: 60px;
+}
+
+.section p {
+    max-width: 850px;
+}
+
+.section .button {
+    margin-bottom: 18px;
+}
+
+.section-catalog {
+    background: var(--light);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.category-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;
+    padding: 24px;
+    color: var(--burgundy);
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    font-family: Georgia, serif;
+    font-size: 22px;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.category-card:hover {
+    color: white;
+    background: var(--burgundy);
+}
+
+/* Підвал */
+
+.site-footer {
+    padding-top: 45px;
+    color: var(--cream);
+    background: var(--burgundy-dark);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 1.2fr;
+    gap: 40px;
+    padding-bottom: 35px;
+}
+
+.footer-logo {
+    width: 85px;
+    height: 95px;
+    margin-bottom: 16px;
+    object-fit: contain;
+}
+
+.footer-brand p {
+    margin-bottom: 6px;
+}
+
+.site-footer h2 {
+    margin-bottom: 18px;
+    color: var(--cream);
+    font-size: 23px;
+}
+
+.footer-navigation,
+.footer-contacts address {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.footer-contacts address {
+    margin-bottom: 14px;
+    font-style: normal;
+    overflow-wrap: anywhere;
+}
+
+.footer-contacts address p {
+    margin: 0;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-block: 20px;
+    border-top: 1px solid rgba(255, 248, 237, 0.3);
+    font-size: 13px;
+}
+
+.footer-bottom p {
+    margin: 0;
+}
+
+/* Планшети та телефони */
+
+@media (max-width: 1000px) {
+    .header-inner {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .brand-logo {
+        width: 65px;
+        height: 75px;
+    }
+
+    .menu-toggle {
+        display: block;
+        margin-left: auto;
+    }
+
+    .main-navigation {
+        order: 3;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    /* Меню згортається після підключення JavaScript */
+    .main-navigation.is-collapsible {
+        display: none;
+    }
+
+    .main-navigation.is-collapsible.is-open {
+        display: flex;
+    }
+
+    .main-navigation a {
+        padding-block: 12px;
+        border-bottom: 1px solid var(--light);
+    }
+
+    .header-actions {
+        gap: 16px;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-contacts {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-actions {
+        order: 2;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .header-actions a {
+        font-size: 14px;
+    }
+
+    .section {
+        padding-block: 38px;
+    }
+
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .category-card {
+        min-height: 90px;
+        font-size: 21px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .footer-contacts {
+        grid-column: auto;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+.menu-toggle {
+    display: none;
+}
+
+@media (max-width: 1000px) {
+    .menu-toggle {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        height: 44px;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .menu-toggle span {
+        display: block;
+        flex-shrink: 0;
+        width: 24px;
+        height: 2px;
+        background-color: #750d16;
+    }
+}
+@media (max-width: 1000px) {
+    .main-navigation.is-collapsible {
+        display: none;
+    }
+
+    .main-navigation.is-collapsible.is-open {
+        display: flex;
+    }
+}

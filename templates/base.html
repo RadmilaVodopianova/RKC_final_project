@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Роздільнянський ковбасний цех{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="{% url 'home' %}">
+            <img
+                class="brand-logo"
+                src="{% static 'images/logo.png' %}"
+                alt="Роздільнянський ковбасний цех — головна"
+            >
+        </a>
+
+        <button
+            class="menu-toggle"
+            type="button"
+            aria-label="Відкрити меню"
+            aria-expanded="false"
+            aria-controls="main-navigation"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="main-navigation" id="main-navigation"
+             aria-label="Головна навігація">
+            <a href="{% url 'home' %}">Головна</a>
+            <a href="/about/">Про підприємство</a>
+            <a href="/catalog/">Каталог</a>
+            <a href="/contacts/">Контакти</a>
+        </nav>
+
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+                <a href="/account/">Особистий кабінет</a>
+            {% else %}
+                <a href="/accounts/login/">Увійти</a>
+            {% endif %}
+
+            <a class="cart-link" href="/cart/">Кошик заявки</a>
+        </div>
+    </div>
+</header>
+
+<main id="main-content">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <a href="{% url 'home' %}">
+                <img
+                        class="footer-logo"
+                        src="{% static 'images/logo.png' %}"
+                        alt="Роздільнянський ковбасний цех — головна"
+                        loading="lazy"
+                >
+            </a>
+            <p>Роздільнянський виробничий комбінат</p>
+            <p>Ковбасний цех</p>
+        </div>
+
+        <nav class="footer-navigation" aria-label="Навігація в підвалі">
+            <h2>Навігація</h2>
+            <a href="{% url 'home' %}">Головна</a>
+            <a href="/about/">Про підприємство</a>
+            <a href="/catalog/">Каталог</a>
+            <a href="/contacts/">Контакти</a>
+        </nav>
+
+        <div class="footer-contacts">
+            <h2>Контакти</h2>
+            <address>
+                <a href="tel:+380485361446">+380 48 536 14 46</a>
+                <a href="mailto:rkcvk.rozdilna@gmail.com">
+                    rkcvk.rozdilna@gmail.com
+                </a>
+                <p>м. Роздільна, вул. Понятівська, 28</p>
+            </address>
+            <p>Щодня, 09:00–18:00</p>
+        </div>
+    </div>
+
+    <div class="container footer-bottom">
+        <p>
+            © {% now "Y" %} Роздільнянський виробничий комбінат.
+            Ковбасний цех
+        </p>
+        <a href="/privacy/">Політика конфіденційності</a>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}" defer></script>
+</body>
+</html>

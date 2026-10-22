@@ -1,13 +1,90 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Головна | Роздільнянський ковбасний цех</title>
-</head>
-<body>
-    <h1>Роздільнянський виробничий комбінат</h1>
-    <h2>Ковбасний цех</h2>
-    <p>Вітаємо на нашому сайті!</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Головна | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="hero" aria-label="Роздільнянський ковбасний цех">
+    <img
+        class="hero-banner"
+        src="{% static 'images/banner.jpg' %}"
+        alt="Роздільнянський ковбасний цех. Смак, що об’єднує"
+    >
+
+    <div class="container hero-actions">
+        <a class="button" href="/catalog/">Переглянути каталог</a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h1>Роздільнянський ковбасний цех</h1>
+
+        <p>
+            Ковбасний цех Роздільнянського виробничого комбінату
+            працює з 2004 року. Ми виготовляємо ковбасні вироби
+            та м’ясні делікатеси за традиційними рецептурами.
+        </p>
+
+        <p>
+            Продукцію можна замовити безпосередньо в цеху,
+            погодивши асортимент і строки виготовлення з менеджером.
+        </p>
+
+        <a class="text-link" href="/about/">Більше про підприємство →</a>
+    </div>
+</section>
+
+<section class="section section-catalog">
+    <div class="container">
+        <h2>Наша продукція</h2>
+
+        <p>
+            Каталог представляє асортимент, який може виготовити
+            підприємство. Наявність на конкретну дату, можливість
+            і строки виготовлення уточнюйте у менеджера.
+        </p>
+
+        <div class="category-grid">
+            <a class="category-card" href="/catalog/?category=vareni">
+                Варені
+            </a>
+            <a class="category-card" href="/catalog/?category=grill">
+                Ковбаски для гриля
+            </a>
+            <a class="category-card" href="/catalog/?category=kopchenosti">
+                Копченості
+            </a>
+            <a class="category-card" href="/catalog/?category=napivkopcheni">
+                Напівкопчені
+            </a>
+            <a class="category-card" href="/catalog/?category=sardelky">
+                Сардельки
+            </a>
+            <a class="category-card" href="/catalog/?category=syrokopcheni">
+                Сирокопчені
+            </a>
+            <a class="category-card" href="/catalog/?category=sosysky">
+                Сосиски
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h2>Зв’яжіться з нами</h2>
+
+        <p>
+            Для уточнення асортименту, строків виготовлення
+            та умов отримання продукції зверніться до менеджера.
+        </p>
+
+        <a class="button" href="tel:+380485361446">
+            Зателефонувати:  +380 48 536 14 46
+        </a>
+
+        <p>Щодня, 09:00–18:00</p>
+    </div>
+</section>
+{% endblock %}
