@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1>Каталог продукції</h1>
+
+        <p>
+            У каталозі представлено продукцію, яку може виготовити
+            наше підприємство. Наявність на конкретну дату,
+            можливість і строки виготовлення уточнюйте у менеджера.
+        </p>
+
+        <form
+            class="catalog-filters"
+            action="{% url 'catalog' %}"
+            method="get"
+        >
+            <div class="filter-field">
+                <label for="catalog-search">Назва продукції</label>
+                <input
+                    type="search"
+                    id="catalog-search"
+                    name="q"
+                    placeholder="Введіть назву"
+                    value="{{ request.GET.q }}"
+                >
+            </div>
+
+            <div class="filter-field">
+                <label for="catalog-category">Підгрупа продукції</label>
+
+                <select id="catalog-category" name="category">
+                    <option value="">Усі підгрупи</option>
+
+                    <option value="vareni"
+                        {% if request.GET.category == "vareni" %}selected{% endif %}>
+                        Варені
+                    </option>
+
+                    <option value="grill"
+                        {% if request.GET.category == "grill" %}selected{% endif %}>
+                        Ковбаски для гриля
+                    </option>
+
+                    <option value="kopchenosti"
+                        {% if request.GET.category == "kopchenosti" %}selected{% endif %}>
+                        Копченості
+                    </option>
+
+                    <option value="napivkopcheni"
+                        {% if request.GET.category == "napivkopcheni" %}selected{% endif %}>
+                        Напівкопчені
+                    </option>
+
+                    <option value="sardelky"
+                        {% if request.GET.category == "sardelky" %}selected{% endif %}>
+                        Сардельки
+                    </option>
+
+                    <option value="syrokopcheni"
+                        {% if request.GET.category == "syrokopcheni" %}selected{% endif %}>
+                        Сирокопчені
+                    </option>
+
+                    <option value="sosysky"
+                        {% if request.GET.category == "sosysky" %}selected{% endif %}>
+                        Сосиски
+                    </option>
+                </select>
+            </div>
+
+            <button class="button" type="submit">Знайти</button>
+            <a class="text-link" href="{% url 'catalog' %}">Скинути</a>
+        </form>
+
+        <div class="catalog-products">
+            {% block products %}
+            {% endblock %}
+        </div>
+    </div>
+</section>
+{% endblock %}

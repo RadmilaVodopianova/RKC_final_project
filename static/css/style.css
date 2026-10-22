@@ -477,3 +477,72 @@ p {
         height: 350px;
     }
 }
+.catalog-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr) auto auto;
+    align-items: end;
+    gap: 18px;
+    margin-top: 30px;
+    padding: 24px;
+    background: var(--light);
+    border-radius: 8px;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.filter-field label {
+    color: var(--burgundy);
+    font-weight: 600;
+}
+
+.filter-field input,
+.filter-field select {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--text);
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+}
+
+.filter-field input:focus-visible,
+.filter-field select:focus-visible {
+    outline: 2px solid var(--burgundy);
+    outline-offset: 2px;
+}
+
+.catalog-filters .button {
+    min-height: 48px;
+    margin: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.catalog-filters > .text-link {
+    padding-block: 12px;
+}
+
+.catalog-products {
+    margin-top: 35px;
+}
+
+@media (max-width: 900px) {
+    .catalog-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .catalog-filters {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+}
