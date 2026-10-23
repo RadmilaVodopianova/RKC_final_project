@@ -7,7 +7,7 @@
 
     <title>{% block title %}Роздільнянський ковбасний цех{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 </head>
 <body>
 
@@ -33,8 +33,11 @@
             <span></span>
         </button>
 
-        <nav class="main-navigation" id="main-navigation"
-             aria-label="Головна навігація">
+        <nav
+            class="main-navigation"
+            id="main-navigation"
+            aria-label="Головна навігація"
+        >
             <a href="{% url 'home' %}">Головна</a>
             <a href="/about/">Про підприємство</a>
             <a href="/catalog/">Каталог</a>
@@ -63,10 +66,10 @@
         <div class="footer-brand">
             <a href="{% url 'home' %}">
                 <img
-                        class="footer-logo"
-                        src="{% static 'images/logo.png' %}"
-                        alt="Роздільнянський ковбасний цех — головна"
-                        loading="lazy"
+                    class="footer-logo"
+                    src="{% static 'images/logo.png' %}"
+                    alt="Роздільнянський ковбасний цех — головна"
+                    loading="lazy"
                 >
             </a>
             <p>Роздільнянський виробничий комбінат</p>
