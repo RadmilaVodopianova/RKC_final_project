@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <a class="text-link" href="{% url 'catalog' %}">
+            ← До каталогу
+        </a>
+
+        <div class="product-detail">
+            <div class="product-detail-photo">
+                {% if product.image %}
+                    <img
+                        src="{{ product.image.url }}"
+                        alt="{{ product.name }}"
+                    >
+                {% else %}
+                    <p>Фото незабаром</p>
+                {% endif %}
+            </div>
+
+            <div class="product-detail-info">
+                <p>{{ product.category.name }}</p>
+                <h1>{{ product.name }}</h1>
+
+                {% if product.composition %}
+                    <h2>Склад</h2>
+                    {{ product.composition|linebreaks }}
+                {% endif %}
+
+                {% if product.nutritional_value %}
+                    <h2>Харчова цінність на 100 г</h2>
+                    {{ product.nutritional_value|linebreaks }}
+                {% endif %}
+
+                {% if product.energy_value %}
+                    <h2>Енергетична цінність на 100 г</h2>
+                    <p>{{ product.energy_value }}</p>
+                {% endif %}
+
+                {% if product.shelf_life %}
+                    <h2>Строк зберігання</h2>
+                    <p>{{ product.shelf_life }}</p>
+                {% endif %}
+
+                {% if product.storage_conditions %}
+                    <h2>Умови зберігання</h2>
+                    {{ product.storage_conditions|linebreaks }}
+                {% endif %}
+
+                <p>
+                    Наявність, можливість і строки виготовлення
+                    уточнюйте у менеджера.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
