@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django import forms
-
+from .models import Order
 
 class CartQuantityForm(forms.Form):
     UNIT_CHOICES = [
@@ -54,3 +54,58 @@ class CartQuantityForm(forms.Form):
                 )
 
         return cleaned_data
+
+class OrderCreateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+
+        fields = (
+            "full_name",
+            "email",
+            "phone",
+            "comment",
+        )
+
+        widgets = {
+            "full_name": forms.TextInput(
+                attrs={"autocomplete": "name"},
+            ),
+            "email": forms.EmailInput(
+                attrs={"autocomplete": "email"},
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "type": "tel",
+                    "autocomplete": "tel",
+                    "placeholder": "+380XXXXXXXXX",
+                },
+            ),
+            "comment": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": (
+                        "Побажання до заявки або зручний час для зв’язку"
+                    ),
+                },
+            ),
+        }
+
+    def clean_phone(self):
+        phone = self.cleaned_data["phone"].strip()
+
+        for character in (" ", "-", "(", ")"):
+            phone = phone.replace(character, "")
+
+        digits = phone[1:] if phone.startswith("+") else phone
+
+        if (
+            not digits.isascii()
+            or not digits.isdigit()
+            or not 7 <= len(digits) <= 15
+        ):
+            raise forms.ValidationError(
+                "Вкажіть номер телефону: від 7 до 15 цифр. "
+                "На початку можна додати +."
+            )
+
+        return phone

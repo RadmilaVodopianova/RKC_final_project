@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Оформлення заявки | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Оформлення заявки</h1>
+
+            <p>
+                Перевірте вибрані товари та вкажіть контактні дані.
+                Менеджер зв’яжеться з вами для погодження
+                наявності, строків виготовлення та вартості.
+            </p>
+
+            <h2>Вибрані товари</h2>
+
+            <ul>
+                {% for item in items %}
+                    <li>
+                        {{ item.product.name }} —
+                        {{ item.quantity }} {{ item.unit_label }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <p>
+                <a class="text-link" href="{% url 'cart_detail' %}">
+                    Змінити товари в кошику
+                </a>
+            </p>
+
+            <h2>Контактні дані</h2>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="auth-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+
+                <p>
+                    Надсилання заявки не є підтвердженням замовлення.
+                    Остаточні умови погоджуються з менеджером.
+                </p>
+
+                <button class="button" type="submit">
+                    Надіслати заявку
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Заявка №{{ order.pk }} | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Заявка №{{ order.pk }}</h1>
+
+            {% for message in messages %}
+                <p role="status">{{ message }}</p>
+            {% endfor %}
+
+            <p>
+                <strong>Дата створення:</strong>
+                {{ order.created_at|date:"d.m.Y H:i" }}
+            </p>
+
+            <p>
+                <strong>Статус:</strong>
+                {{ order.get_status_display }}
+            </p>
+
+            <h2>Товари у заявці</h2>
+
+            <ul>
+                {% for item in order.items.all %}
+                    <li>
+                        {{ item.product_name }} —
+                        {{ item.quantity }} {{ item.get_unit_display }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <h2>Контактні дані</h2>
+
+            <dl class="account-details">
+                <dt>Ім’я та прізвище</dt>
+                <dd>{{ order.full_name }}</dd>
+
+                <dt>Електронна пошта</dt>
+                <dd>{{ order.email }}</dd>
+
+                <dt>Номер телефону</dt>
+                <dd>{{ order.phone }}</dd>
+            </dl>
+
+            {% if order.comment %}
+                <h2>Коментар до заявки</h2>
+                {{ order.comment|linebreaks }}
+            {% endif %}
+
+            <p>
+                Наявність, строки виготовлення та вартість
+                погоджуються з менеджером.
+            </p>
+
+            <p>
+                <a class="text-link" href="{% url 'account' %}">
+                    До особистого кабінету
+                </a>
+            </p>
+
+            <p>
+                <a class="text-link" href="{% url 'catalog' %}">
+                    Перейти до каталогу
+                </a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

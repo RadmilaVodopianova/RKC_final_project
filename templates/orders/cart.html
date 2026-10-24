@@ -91,6 +91,19 @@
                     </article>
                 {% endfor %}
             </div>
+
+            <p>
+                <a class="button" href="{% url 'order_create' %}">
+                    Оформити заявку
+                </a>
+            </p>
+
+            {% if not user.is_authenticated %}
+                <p>
+                    Для оформлення заявки потрібно увійти
+                    або зареєструватися.
+                </p>
+            {% endif %}
         {% else %}
             <p>Ваш кошик поки порожній.</p>
         {% endif %}
