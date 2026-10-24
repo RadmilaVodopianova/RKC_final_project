@@ -61,4 +61,44 @@
         </div>
     </div>
 </section>
+
+<section class="section">
+    <div class="container">
+        <div class="auth-card">
+            <h2>Зв’язатися з нами</h2>
+
+            <p>
+                Залиште запитання та контактні дані,
+                щоб менеджер міг зв’язатися з вами.
+            </p>
+
+            {% for message in messages %}
+                <p role="status">{{ message }}</p>
+            {% endfor %}
+
+            <form
+                class="auth-form"
+                method="post"
+                action="{% url 'contacts' %}"
+            >
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="auth-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+
+                <button class="button" type="submit">
+                    Надіслати звернення
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

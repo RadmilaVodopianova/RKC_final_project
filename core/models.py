@@ -81,3 +81,42 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class ContactMessage(models.Model):
+    name = models.CharField(
+        "Ім’я",
+        max_length=150,
+    )
+
+    email = models.EmailField(
+        "Електронна пошта",
+    )
+
+    phone = models.CharField(
+        "Номер телефону",
+        max_length=20,
+        blank=True,
+    )
+
+    message = models.TextField(
+        "Повідомлення",
+        max_length=3000,
+    )
+
+    is_processed = models.BooleanField(
+        "Опрацьовано",
+        default=False,
+    )
+
+    created_at = models.DateTimeField(
+        "Дата надходження",
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = "Звернення"
+        verbose_name_plural = "Звернення"
+        ordering = ["-created_at", "-pk"]
+
+    def __str__(self):
+        return f"Звернення №{self.pk} — {self.name}"
