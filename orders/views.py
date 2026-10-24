@@ -1,17 +1,17 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import Max
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from core.models import Product
 
 from .cart import Cart
-from .forms import CartQuantityForm
-
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-
-from .forms import OrderCreateForm
+from .forms import CartQuantityForm, OrderCreateForm
 from .models import Order, OrderItem
+
 
 def cart_detail(request):
     cart = Cart(request)
@@ -68,7 +68,6 @@ def cart_update(request, product_id, unit):
         is_active=True,
     )
 
-    # Оновлюємо кількість у поточній одиниці виміру.
     data = request.POST.copy()
     data["unit"] = unit
     form = CartQuantityForm(data)
@@ -103,6 +102,8 @@ def cart_remove(request, product_id, unit):
     messages.success(request, "Позицію видалено з кошика.")
 
     return redirect("cart_detail")
+
+
 @login_required
 def order_create(request):
     cart = Cart(request)
@@ -120,8 +121,21 @@ def order_create(request):
 
         if form.is_valid():
             with transaction.atomic():
+                user = (
+                    get_user_model().objects
+                    .select_for_update()
+                    .get(pk=request.user.pk)
+                )
+
+                last_number = (
+                    Order.objects.filter(user=user)
+                    .aggregate(last=Max("customer_number"))["last"]
+                    or 0
+                )
+
                 order = form.save(commit=False)
-                order.user = request.user
+                order.user = user
+                order.customer_number = last_number + 1
                 order.save()
 
                 for item in items:
@@ -139,7 +153,7 @@ def order_create(request):
 
             messages.success(
                 request,
-                f"Заявку №{order.pk} успішно створено.",
+                f"Заявку №{order.customer_number} успішно створено.",
             )
 
             return redirect("order_detail", pk=order.pk)
