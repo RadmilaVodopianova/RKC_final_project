@@ -22,6 +22,13 @@ class Order(models.Model):
         verbose_name="Користувач",
     )
 
+    customer_number = models.PositiveIntegerField(
+        "Номер заявки користувача",
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
     full_name = models.CharField(
         "Ім’я та прізвище",
         max_length=301,
