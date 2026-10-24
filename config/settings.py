@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,13 @@ MAILERS = {
 }
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Вхід і перенаправлення користувачів
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/account/"
+LOGOUT_REDIRECT_URL = "/"
+
+# Вхід за електронною поштою
+AUTHENTICATION_BACKENDS = [
+    "accounts.backends.EmailBackend",
+]

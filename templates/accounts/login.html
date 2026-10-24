@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Вхід | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Вхід до особистого кабінету</h1>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="auth-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <button class="button" type="submit">
+                    Увійти
+                </button>
+            </form>
+
+            <p>
+                Ще не маєте облікового запису?
+                <a class="text-link" href="{% url 'register' %}">
+                    Зареєструватися
+                </a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}
