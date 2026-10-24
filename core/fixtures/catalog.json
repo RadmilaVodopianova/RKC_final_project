@@ -241,7 +241,7 @@
   "fields": {
     "category": 1,
     "name": "Паштет печінковий",
-    "image": "",
+    "image": "products/Pashtet_pechinkovyi.png",
     "composition": "",
     "nutritional_value": "",
     "energy_value": "",
@@ -436,7 +436,7 @@
   "fields": {
     "category": 3,
     "name": "Рулет «Пікантний»",
-    "image": "",
+    "image": "products/Rulet_pikantnyi.png",
     "composition": "Свинина грудореберна та тазостегнова частина — 45%, філе куряче 40%, вода питна 3%, білок яловичий, суміш прянощів та трав, фіксатор кольору Е250",
     "nutritional_value": "білки 21,00; жири 20,00; вуглеводи 0,00; сіль 4,00",
     "energy_value": "500,00 ккал;",
