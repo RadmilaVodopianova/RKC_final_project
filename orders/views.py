@@ -7,6 +7,11 @@ from core.models import Product
 from .cart import Cart
 from .forms import CartQuantityForm
 
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
+from .forms import OrderCreateForm
+from .models import Order, OrderItem
 
 def cart_detail(request):
     cart = Cart(request)
@@ -98,3 +103,77 @@ def cart_remove(request, product_id, unit):
     messages.success(request, "Позицію видалено з кошика.")
 
     return redirect("cart_detail")
+@login_required
+def order_create(request):
+    cart = Cart(request)
+    items = list(cart)
+
+    if not items:
+        messages.info(
+            request,
+            "Додайте товари до кошика перед оформленням заявки.",
+        )
+        return redirect("cart_detail")
+
+    if request.method == "POST":
+        form = OrderCreateForm(request.POST)
+
+        if form.is_valid():
+            with transaction.atomic():
+                order = form.save(commit=False)
+                order.user = request.user
+                order.save()
+
+                for item in items:
+                    order_item = OrderItem(
+                        order=order,
+                        product=item["product"],
+                        product_name=item["product"].name,
+                        quantity=item["quantity"],
+                        unit=item["unit"],
+                    )
+                    order_item.full_clean()
+                    order_item.save()
+
+            cart.clear()
+
+            messages.success(
+                request,
+                f"Заявку №{order.pk} успішно створено.",
+            )
+
+            return redirect("order_detail", pk=order.pk)
+    else:
+        profile = getattr(request.user, "profile", None)
+
+        form = OrderCreateForm(
+            initial={
+                "full_name": request.user.get_full_name(),
+                "email": request.user.email,
+                "phone": profile.phone if profile else "",
+            },
+        )
+
+    return render(
+        request,
+        "orders/order_create.html",
+        {
+            "form": form,
+            "items": items,
+        },
+    )
+
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items"),
+        pk=pk,
+        user=request.user,
+    )
+
+    return render(
+        request,
+        "orders/order_detail.html",
+        {"order": order},
+    )

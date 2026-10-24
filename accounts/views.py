@@ -69,11 +69,17 @@ def account(request):
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=profile)
 
+    orders = request.user.orders.order_by(
+        "-created_at",
+        "-pk",
+    )
+
     return render(
         request,
         "accounts/account.html",
         {
             "user_form": user_form,
             "profile_form": profile_form,
+            "orders": orders,
         },
     )
