@@ -2,7 +2,10 @@ from django.shortcuts import get_object_or_404, render
 
 from .models import Category, Product
 
+from django.contrib import messages
+from django.shortcuts import redirect
 
+from .forms import ContactMessageForm
 def home(request):
     return render(request, "home.html")
 
@@ -12,7 +15,38 @@ def about(request):
 
 
 def contacts(request):
-    return render(request, "contacts.html")
+    if request.method == "POST":
+        form = ContactMessageForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Ваше звернення надіслано. "
+                "Менеджер зв’яжеться з вами за вказаними контактами.",
+            )
+
+            return redirect("contacts")
+    else:
+        initial = {}
+
+        if request.user.is_authenticated:
+            profile = getattr(request.user, "profile", None)
+
+            initial = {
+                "name": request.user.get_full_name(),
+                "email": request.user.email,
+                "phone": profile.phone if profile else "",
+            }
+
+        form = ContactMessageForm(initial=initial)
+
+    return render(
+        request,
+        "contacts.html",
+        {"form": form},
+    )
 
 
 def catalog(request):
