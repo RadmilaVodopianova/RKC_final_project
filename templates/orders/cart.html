@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Кошик заявки | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1>Кошик заявки</h1>
+
+        <p>
+            Перевірте вибрані товари та їхню кількість.
+            Наявність і строки виготовлення уточнюються у менеджера.
+        </p>
+
+        {% for message in messages %}
+            <p role="status">{{ message }}</p>
+        {% endfor %}
+
+        {% if items %}
+            <div class="cart-items">
+                {% for item in items %}
+                    <article class="cart-item">
+                        <a href="{% url 'product_detail' item.product.pk %}">
+                            {% if item.product.image %}
+                                <img
+                                    class="cart-item-image"
+                                    src="{{ item.product.image.url }}"
+                                    alt="{{ item.product.name }}"
+                                    loading="lazy"
+                                    width="120"
+                                    height="150"
+                                    style="object-fit: contain;"
+                                >
+                            {% else %}
+                                <span>Фото незабаром</span>
+                            {% endif %}
+                        </a>
+
+                        <div class="cart-item-info">
+                            <h2>
+                                <a href="{% url 'product_detail' item.product.pk %}">
+                                    {{ item.product.name }}
+                                </a>
+                            </h2>
+
+                            <p>
+                                Кількість:
+                                {{ item.quantity }} {{ item.unit_label }}
+                            </p>
+
+                            <form
+                                class="cart-update-form"
+                                method="post"
+                                action="{% url 'cart_update' item.product.pk item.unit %}"
+                            >
+                                {% csrf_token %}
+
+                                <div class="auth-field">
+                                    <label for="quantity-{{ item.product.pk }}-{{ item.unit }}">
+                                        Кількість, {{ item.unit_label }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        id="quantity-{{ item.product.pk }}-{{ item.unit }}"
+                                        name="quantity"
+                                        value="{{ item.quantity|stringformat:'.2f' }}"
+                                        min="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
+                                        max="1000"
+                                        step="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
+                                        required
+                                    >
+                                </div>
+
+                                <button class="button" type="submit">
+                                    Оновити кількість
+                                </button>
+                            </form>
+
+                            <form
+                                method="post"
+                                action="{% url 'cart_remove' item.product.pk item.unit %}"
+                            >
+                                {% csrf_token %}
+
+                                <button class="button" type="submit">
+                                    Видалити
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Ваш кошик поки порожній.</p>
+        {% endif %}
+
+        <p>
+            <a class="text-link" href="{% url 'catalog' %}">
+                Продовжити вибір товарів
+            </a>
+        </p>
+    </div>
+</section>
+{% endblock %}
