@@ -85,3 +85,5 @@ def product_detail(request, pk):
         "product_detail.html",
         {"product": product},
     )
+def privacy(request):
+    return render(request, "privacy.html")
