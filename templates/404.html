@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Сторінку не знайдено | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-card">
+            <h1>Сторінку не знайдено</h1>
+
+            <p>
+                Можливо, адресу вказано неправильно
+                або ця сторінка недоступна.
+            </p>
+
+            <p>
+                <a class="button" href="{% url 'home' %}">
+                    На головну
+                </a>
+            </p>
+
+            <p>
+                <a class="text-link" href="{% url 'catalog' %}">
+                    Перейти до каталогу
+                </a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}
