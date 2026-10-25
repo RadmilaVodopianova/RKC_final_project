@@ -1,10 +1,13 @@
+
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Каталог | Роздільнянський ковбасний цех{% endblock %}
 
 {% block content %}
 <section class="section">
     <div class="container">
+
         <h1>Каталог продукції</h1>
 
         <p>
@@ -13,13 +16,17 @@
             можливість і строки виготовлення уточнюйте у менеджера.
         </p>
 
+        <!-- ПОШУК І ФІЛЬТРАЦІЯ -->
         <form
             class="catalog-filters"
             action="{% url 'catalog' %}"
             method="get"
         >
             <div class="filter-field">
-                <label for="catalog-search">Назва продукції</label>
+                <label for="catalog-search">
+                    Назва продукції
+                </label>
+
                 <input
                     type="search"
                     id="catalog-search"
@@ -30,10 +37,17 @@
             </div>
 
             <div class="filter-field">
-                <label for="catalog-category">Підгрупа продукції</label>
+                <label for="catalog-category">
+                    Підгрупа продукції
+                </label>
 
-                <select id="catalog-category" name="category">
-                    <option value="">Усі підгрупи</option>
+                <select
+                    id="catalog-category"
+                    name="category"
+                >
+                    <option value="">
+                        Усі підгрупи
+                    </option>
 
                     {% for category in categories %}
                         <option
@@ -46,22 +60,85 @@
                 </select>
             </div>
 
-            <button class="button" type="submit">Знайти</button>
-            <a class="text-link" href="{% url 'catalog' %}">Скинути</a>
+            <button class="button" type="submit">
+                Знайти
+            </button>
+
+            <a
+                class="text-link"
+                href="{% url 'catalog' %}"
+            >
+                Скинути
+            </a>
         </form>
 
+        <!-- КІЛЬКІСТЬ ТОВАРІВ -->
         <p class="catalog-count">
             Знайдено товарів: {{ products|length }}
         </p>
 
+        <!-- КАТАЛОГ ПРОДУКЦІЇ -->
         <div class="catalog-products">
+
             {% for product in products %}
-                <article class="product-card">
+
+                <article
+                    class="product-card"
+                    style="position: relative;"
+                >
+
+                    <!-- КНОПКА ОБРАНОГО -->
+                    <form
+                        action="{% url 'toggle_favorite' product.pk %}"
+                        method="post"
+                        class="favorite-form"
+                        style="position: absolute; top: 12px; right: 12px; left: auto; z-index: 10; margin: 0;"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="next"
+                            value="{{ request.get_full_path }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="favorite-button"
+                            style="width: 42px; height: 42px; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #eadfd3; background: white; cursor: pointer;"
+                            title="{% if product.pk in favorite_product_ids %}Видалити з обраного{% else %}Додати до обраного{% endif %}"
+                            aria-label="{% if product.pk in favorite_product_ids %}Видалити з обраного{% else %}Додати до обраного{% endif %}: {{ product.name }}"
+                        >
+
+                            {% if product.pk in favorite_product_ids %}
+                                <img
+                                    src="{% static 'images/heart-filled.png' %}"
+                                    alt=""
+                                    width="24"
+                                    height="24"
+                                    style="display: block; width: 24px; height: 24px; max-width: 24px; max-height: 24px; object-fit: contain;"
+                                >
+                            {% else %}
+                                <img
+                                    src="{% static 'images/heart-outline.png' %}"
+                                    alt=""
+                                    width="24"
+                                    height="24"
+                                    style="display: block; width: 24px; height: 24px; max-width: 24px; max-height: 24px; object-fit: contain;"
+                                >
+                            {% endif %}
+
+                        </button>
+                    </form>
+
+                    <!-- ПОСИЛАННЯ НА ТОВАР -->
                     <a
                         class="product-card-link"
                         href="{% url 'product_detail' product.pk %}"
                     >
+
                         <div class="product-card-image">
+
                             {% if product.image %}
                                 <img
                                     src="{{ product.image.url }}"
@@ -73,9 +150,11 @@
                                     Фото незабаром
                                 </div>
                             {% endif %}
+
                         </div>
 
                         <div class="product-card-content">
+
                             <p class="product-card-category">
                                 {{ product.category.name }}
                             </p>
@@ -83,16 +162,24 @@
                             <h2 class="product-card-title">
                                 {{ product.name }}
                             </h2>
+
                         </div>
+
                     </a>
+
                 </article>
+
             {% empty %}
+
                 <p class="catalog-empty">
                     За вашим запитом товарів не знайдено.
                     Спробуйте іншу назву або підгрупу.
                 </p>
+
             {% endfor %}
+
         </div>
+
     </div>
 </section>
 {% endblock %}

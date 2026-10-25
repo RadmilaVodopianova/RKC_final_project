@@ -1,0 +1,121 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Обрані товари | Роздільнянський ковбасний цех{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+
+        <h1>Обрані товари ❤️</h1>
+
+        <p>
+            Тут зберігається продукція, яку ви додали
+            до свого списку обраного.
+        </p>
+
+        <div class="catalog-products">
+
+            {% for item in favorite_items %}
+
+                <article
+                    class="product-card"
+                    style="position: relative;"
+                >
+
+                    <!-- ВИДАЛЕННЯ З ОБРАНОГО -->
+                    <form
+                        action="{% url 'toggle_favorite' item.product.pk %}"
+                        method="post"
+                        class="favorite-form"
+                        style="position: absolute; top: 12px; right: 12px; left: auto; z-index: 10; margin: 0;"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="next"
+                            value="{% url 'favorites' %}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="favorite-button is-favorite"
+                            style="width: 42px; height: 42px; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #eadfd3; background: white; cursor: pointer;"
+                            title="Видалити з обраного"
+                            aria-label="Видалити з обраного: {{ item.product.name }}"
+                        >
+                            <img
+                                src="{% static 'images/heart-filled.png' %}"
+                                alt=""
+                                width="24"
+                                height="24"
+                                style="display: block; width: 24px; height: 24px; max-width: 24px; max-height: 24px; object-fit: contain;"
+                            >
+                        </button>
+                    </form>
+
+                    <!-- КАРТКА ТОВАРУ -->
+                    <a
+                        class="product-card-link"
+                        href="{% url 'product_detail' item.product.pk %}"
+                    >
+
+                        <div class="product-card-image">
+
+                            {% if item.product.image %}
+                                <img
+                                    src="{{ item.product.image.url }}"
+                                    alt="{{ item.product.name }}"
+                                    loading="lazy"
+                                >
+                            {% else %}
+                                <div class="product-card-placeholder">
+                                    Фото незабаром
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="product-card-content">
+
+                            <p class="product-card-category">
+                                {{ item.product.category.name }}
+                            </p>
+
+                            <h2 class="product-card-title">
+                                {{ item.product.name }}
+                            </h2>
+
+                        </div>
+
+                    </a>
+
+                </article>
+
+            {% empty %}
+
+                <div class="catalog-empty">
+                    <h2>Поки що немає обраних товарів</h2>
+
+                    <p>
+                        Перейдіть до каталогу та додайте
+                        продукцію, яка вас цікавить.
+                    </p>
+
+                    <a
+                        class="button"
+                        href="{% url 'catalog' %}"
+                    >
+                        Перейти до каталогу
+                    </a>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
+{% endblock %}

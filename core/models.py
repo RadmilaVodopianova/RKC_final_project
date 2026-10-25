@@ -1,5 +1,10 @@
+from django.conf import settings
 from django.db import models
 
+
+# =========================
+# КАТЕГОРИИ ТОВАРОВ
+# =========================
 
 class Category(models.Model):
     name = models.CharField(
@@ -22,6 +27,10 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
+# =========================
+# ТОВАРЫ
+# =========================
 
 class Product(models.Model):
     category = models.ForeignKey(
@@ -82,6 +91,11 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+
+# =========================
+# ОБРАЩЕНИЯ С САЙТА
+# =========================
+
 class ContactMessage(models.Model):
     name = models.CharField(
         "Ім’я",
@@ -120,3 +134,43 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"Звернення №{self.pk} — {self.name}"
+
+
+# =========================
+# ИЗБРАННЫЕ ТОВАРЫ ❤️
+# =========================
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+        verbose_name="Користувач",
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+        verbose_name="Товар",
+    )
+
+    created_at = models.DateTimeField(
+        "Дата додавання",
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = "Обраний товар"
+        verbose_name_plural = "Обрані товари"
+        ordering = ["-created_at"]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "product"],
+                name="unique_user_favorite_product",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} — {self.product.name}"
