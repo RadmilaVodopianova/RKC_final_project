@@ -191,3 +191,71 @@ def order_detail(request, pk):
         "orders/order_detail.html",
         {"order": order},
     )
+
+# =========================
+# ПОВТОРЕННЯ ПОПЕРЕДНЬОЇ ЗАЯВКИ
+# =========================
+
+@login_required
+@require_POST
+def order_repeat(request, pk):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__product"),
+        pk=pk,
+        user=request.user,
+    )
+
+    cart = Cart(request)
+
+    added_count = 0
+    skipped_count = 0
+
+    for item in order.items.all():
+        product = item.product
+
+        # Перевіряємо, чи товар ще доступний у каталозі
+        if product is None or not product.is_active:
+            skipped_count += 1
+            continue
+
+        # Перевіряємо кількість та одиницю виміру
+        form = CartQuantityForm({
+            "quantity": item.quantity,
+            "unit": item.unit,
+        })
+
+        if not form.is_valid():
+            skipped_count += 1
+            continue
+
+        try:
+            cart.add(
+                product,
+                form.cleaned_data["quantity"],
+                form.cleaned_data["unit"],
+            )
+            added_count += 1
+
+        except ValueError:
+            skipped_count += 1
+
+    if added_count:
+        messages.success(
+            request,
+            "Товари з попередньої заявки додано до кошика."
+        )
+    else:
+        messages.warning(
+            request,
+            "Не вдалося додати товари з попередньої заявки."
+        )
+
+    if skipped_count:
+        messages.warning(
+            request,
+            f"Не додано позицій: {skipped_count}. "
+            "Деякі товари більше недоступні або мають "
+            "некоректну кількість."
+        )
+
+    return redirect("cart_detail")
