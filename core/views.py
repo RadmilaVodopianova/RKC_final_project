@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -12,7 +13,21 @@ from .models import Category, Favorite, Product
 # =========================
 
 def home(request):
-    return render(request, "home.html")
+    category_previews = (
+        Product.objects.filter(is_active=True)
+        .exclude(image="")
+        .only("id", "category_id", "image")
+        .order_by("pk")[:1]
+    )
+    categories = Category.objects.prefetch_related(
+        Prefetch(
+            "products",
+            queryset=category_previews,
+            to_attr="preview_products",
+        )
+    )
+
+    return render(request, "home.html", {"categories": categories})
 
 
 # =========================
