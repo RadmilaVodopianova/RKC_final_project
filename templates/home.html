@@ -4,21 +4,48 @@
 {% block title %}Головна | Роздільнянський ковбасний цех{% endblock %}
 
 {% block content %}
-<section class="hero" aria-label="Роздільнянський ковбасний цех">
-    <img
-        class="hero-banner"
-        src="{% static 'images/banner.jpg' %}"
-        alt="Роздільнянський ковбасний цех. Смак, що об’єднує"
-    >
+<section class="hero" aria-labelledby="hero-title">
+    <div class="hero-visual" aria-hidden="true">
+        <img
+            class="hero-banner"
+            src="{% static 'images/banner.jpg' %}"
+            alt=""
+            width="2197"
+            height="716"
+            fetchpriority="high"
+        >
+    </div>
 
-    <div class="container hero-actions">
-        <a class="button" href="{% url 'catalog' %}">Переглянути каталог</a>
+    <div class="container hero-inner">
+        <div class="hero-content">
+            <p class="hero-eyebrow">Роздільнянський ковбасний цех</p>
+
+            <h1 id="hero-title" class="hero-title">
+                Смак, що <span>об’єднує</span>
+            </h1>
+
+            <p class="hero-description">
+                Ковбасні вироби та м’ясні делікатеси за традиційними
+                рецептурами. Виготовляємо з 2004 року.
+            </p>
+
+            <div class="hero-actions">
+                <a class="button hero-button" href="{% url 'catalog' %}">
+                    Переглянути каталог
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <p class="hero-note">
+                Асортимент і строки виготовлення узгоджуємо з менеджером.
+            </p>
+        </div>
     </div>
 </section>
 
 <section class="section">
     <div class="container">
-        <h1>Роздільнянський ковбасний цех</h1>
+        <h2>Роздільнянський ковбасний цех</h2>
 
         <p>
             Ковбасний цех Роздільнянського виробничого комбінату
