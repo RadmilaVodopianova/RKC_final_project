@@ -6,6 +6,8 @@
     --burgundy-dark: #540810;
     --gold: #c79838;
     --text: #382822;
+    --font-body: "Manrope", Arial, sans-serif;
+    --font-heading: "Playfair Display", Georgia, serif;
 }
 
 * {
@@ -17,7 +19,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    font-family: Arial, sans-serif;
+    font-family: var(--font-body);
     color: var(--text);
     background: var(--cream);
     line-height: 1.6;
@@ -37,7 +39,10 @@ a {
     text-decoration: none;
 }
 
-button {
+button,
+input,
+select,
+textarea {
     font: inherit;
 }
 
@@ -56,7 +61,7 @@ h1,
 h2 {
     margin: 0 0 20px;
     color: var(--burgundy);
-    font-family: Georgia, serif;
+    font-family: var(--font-heading);
     line-height: 1.2;
 }
 
@@ -66,6 +71,10 @@ h1 {
 
 h2 {
     font-size: clamp(25px, 3vw, 34px);
+}
+
+h3 {
+    font-family: var(--font-heading);
 }
 
 p {
@@ -203,7 +212,7 @@ p {
     background: var(--cream);
     border: 1px solid var(--gold);
     border-radius: 8px;
-    font-family: Georgia, serif;
+    font-family: var(--font-heading);
     font-size: 22px;
     text-align: center;
     transition: background-color 0.2s, color 0.2s;
