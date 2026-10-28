@@ -125,9 +125,29 @@ p {
 }
 
 .cart-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 16px;
     border: 1px solid var(--burgundy);
     border-radius: 6px;
+}
+
+.cart-count {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding-inline: 6px;
+    color: var(--cream);
+    background: var(--burgundy);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .menu-toggle {

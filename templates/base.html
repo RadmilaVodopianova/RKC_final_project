@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="{% static 'css/style.css' %}?v=12"
+        href="{% static 'css/style.css' %}?v=13"
     >
 </head>
 
@@ -77,8 +77,15 @@
                 </a>
             {% endif %}
 
-            <a class="cart-link" href="{% url 'cart_detail' %}">
-                Кошик заявки
+            <a
+                class="cart-link"
+                href="{% url 'cart_detail' %}"
+                aria-label="Кошик заявки. Кількість позицій: {{ cart_item_count }}"
+            >
+                <span>Кошик заявки</span>
+                <span class="cart-count" id="cart-count" aria-hidden="true">
+                    {{ cart_item_count }}
+                </span>
             </a>
 
         </div>
