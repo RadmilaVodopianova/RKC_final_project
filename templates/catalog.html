@@ -74,7 +74,7 @@
 
         <!-- КІЛЬКІСТЬ ТОВАРІВ -->
         <p class="catalog-count">
-            Знайдено товарів: {{ products|length }}
+            Знайдено товарів: {{ page_obj.paginator.count }}
         </p>
 
         <!-- КАТАЛОГ ПРОДУКЦІЇ -->
@@ -182,6 +182,50 @@
             {% endfor %}
 
         </div>
+
+        {% if page_obj.has_other_pages %}
+            <nav class="catalog-pagination" aria-label="Сторінки каталогу">
+                {% if page_obj.has_previous %}
+                    <a
+                        class="pagination-link"
+                        href="{% querystring page=page_obj.previous_page_number %}"
+                        rel="prev"
+                    >
+                        ← Попередня
+                    </a>
+                {% endif %}
+
+                <ul class="pagination-list">
+                    {% for number in page_obj.paginator.page_range %}
+                        <li>
+                            {% if number == page_obj.number %}
+                                <span class="pagination-current" aria-current="page">
+                                    {{ number }}
+                                </span>
+                            {% else %}
+                                <a
+                                    class="pagination-link"
+                                    href="{% querystring page=number %}"
+                                    aria-label="Сторінка {{ number }}"
+                                >
+                                    {{ number }}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                {% if page_obj.has_next %}
+                    <a
+                        class="pagination-link"
+                        href="{% querystring page=page_obj.next_page_number %}"
+                        rel="next"
+                    >
+                        Наступна →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
 
     </div>
 </section>
