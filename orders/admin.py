@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.db import transaction
 from django.db.models import Count
+from django.utils.html import format_html
 
 from .models import Order, OrderItem
 
@@ -29,7 +30,7 @@ class OrderAdmin(admin.ModelAdmin):
         "id",
         "full_name",
         "phone",
-        "status",
+        "status_badge",
         "item_count",
         "created_at",
     )
@@ -72,6 +73,19 @@ class OrderAdmin(admin.ModelAdmin):
         "mark_confirmed",
         "mark_cancelled",
     )
+
+    class Media:
+        css = {
+            "all": ("css/admin.css",),
+        }
+
+    @admin.display(description="Статус", ordering="status")
+    def status_badge(self, obj):
+        return format_html(
+            '<span class="rkc-status-badge rkc-status-badge--{}">{}</span>',
+            obj.status,
+            obj.get_status_display(),
+        )
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(

@@ -1,0 +1,57 @@
+.rkc-status-badge {
+    --badge-background: #f5ead8;
+    --badge-color: #382822;
+    --badge-border: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--badge-border);
+    border-radius: 999px;
+    background: var(--badge-background);
+    color: var(--badge-color);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.rkc-status-badge::before {
+    content: "";
+    flex: 0 0 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.rkc-status-badge--new {
+    --badge-background: #fff0bf;
+    --badge-color: #735110;
+    --badge-border: #dec78b;
+}
+
+.rkc-status-badge--processing {
+    --badge-background: #e5f1fc;
+    --badge-color: #204d75;
+    --badge-border: #bad3e6;
+}
+
+.rkc-status-badge--confirmed {
+    --badge-background: #e6efd8;
+    --badge-color: #415d2b;
+    --badge-border: #c5d4ad;
+}
+
+.rkc-status-badge--completed {
+    --badge-background: #d7eee4;
+    --badge-color: #1b5140;
+    --badge-border: #afd2c0;
+}
+
+.rkc-status-badge--cancelled {
+    --badge-background: #f9e2e4;
+    --badge-color: #750d16;
+    --badge-border: #e3b8bd;
+}
