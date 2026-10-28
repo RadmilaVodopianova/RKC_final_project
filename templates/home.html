@@ -73,27 +73,38 @@
         </p>
 
         <div class="category-grid">
-            <a class="category-card" href="{% url 'catalog' %}?category=vareni">
-                Варені
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=grill">
-                Ковбаски для гриля
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=kopchenosti">
-                Копченості
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=napivkopcheni">
-                Напівкопчені
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=sardelky">
-                Сардельки
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=syrokopcheni">
-                Сирокопчені
-            </a>
-            <a class="category-card" href="{% url 'catalog' %}?category=sosysky">
-                Сосиски
-            </a>
+            {% for category in categories %}
+                <a
+                    class="category-card"
+                    href="{% url 'catalog' %}?category={{ category.slug|urlencode }}"
+                >
+                    <span class="category-card-image">
+                        {% with preview=category.preview_products.0 %}
+                            {% if preview %}
+                                <img
+                                    src="{{ preview.image.url }}"
+                                    alt=""
+                                    width="400"
+                                    height="500"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            {% else %}
+                                <span class="category-card-placeholder">
+                                    Фото незабаром
+                                </span>
+                            {% endif %}
+                        {% endwith %}
+                    </span>
+
+                    <span class="category-card-caption">
+                        <span class="category-card-title">{{ category.name }}</span>
+                        <span class="category-card-arrow" aria-hidden="true">↗</span>
+                    </span>
+                </a>
+            {% empty %}
+                <p class="category-empty">Категорії незабаром з’являться.</p>
+            {% endfor %}
         </div>
     </div>
 </section>

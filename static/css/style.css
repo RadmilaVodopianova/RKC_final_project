@@ -377,24 +377,86 @@ p {
 }
 
 .category-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 130px;
-    padding: 24px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+    overflow: hidden;
     color: var(--burgundy);
     background: var(--cream);
     border: 1px solid var(--gold);
-    border-radius: 8px;
-    font-family: var(--font-heading);
-    font-size: 22px;
-    text-align: center;
-    transition: background-color 0.2s, color 0.2s;
+    border-radius: 12px;
 }
 
-.category-card:hover {
-    color: white;
-    background: var(--burgundy);
+.category-card:hover,
+.category-card:focus-visible {
+    border-color: var(--burgundy);
+}
+
+.category-card:focus-visible {
+    outline: 3px solid var(--burgundy);
+    outline-offset: 5px;
+}
+
+.category-card-image {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--light);
+}
+
+.category-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.category-card-placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    color: var(--burgundy);
+    font-size: 13px;
+    text-align: center;
+}
+
+.category-card-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 18px;
+}
+
+.category-card-title {
+    min-width: 0;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.category-card:hover .category-card-title {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.category-card-arrow {
+    display: grid;
+    flex: 0 0 32px;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    background: var(--light);
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.category-empty {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
 }
 
 /* Підвал */
@@ -543,8 +605,26 @@ p {
     }
 
     .category-card {
-        min-height: 90px;
-        font-size: 21px;
+        grid-template-columns: 104px minmax(0, 1fr);
+        grid-template-rows: auto;
+    }
+
+    .category-card-image {
+        height: 100%;
+        min-height: 130px;
+    }
+
+    .category-card-caption {
+        gap: 8px;
+        padding: 16px 12px;
+    }
+
+    .category-card-title {
+        font-size: 20px;
+    }
+
+    .category-card-arrow {
+        display: none;
     }
 
     .footer-grid {
@@ -752,7 +832,7 @@ p {
 }
 
 .product-card-image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
     overflow: hidden;
     background: #f0e7dc;
 }
@@ -761,7 +841,7 @@ p {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 .product-card-placeholder {
@@ -815,11 +895,6 @@ p {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
-}
-
-.product-card-image {
-    aspect-ratio: auto;
-    height: 240px;
 }
 
 .product-card-content {
@@ -1487,3 +1562,63 @@ p {
     }
 }
 
+/* Компактна сітка каталогу з декоративними рамками */
+
+.catalog-products.catalog-products-framed {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.catalog-products-framed .product-card {
+    padding: 6px;
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 18px;
+    box-shadow: 0 4px 14px rgba(84, 8, 16, 0.08);
+}
+
+.catalog-products-framed .product-card:hover,
+.catalog-products-framed .product-card:focus-within {
+    border-color: var(--burgundy);
+}
+
+.catalog-products-framed .product-card-image {
+    border: 1px solid rgba(199, 152, 56, 0.28);
+    border-radius: 12px;
+}
+
+.catalog-products-framed .product-card-content {
+    padding: 14px 8px 8px;
+}
+
+.catalog-products-framed .product-card-category {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.catalog-products-framed .product-card-title {
+    font-size: 18px;
+    line-height: 1.35;
+}
+
+@media (max-width: 1100px) {
+    .catalog-products.catalog-products-framed {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    .catalog-products.catalog-products-framed {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalog-products.catalog-products-framed {
+        grid-template-columns: 1fr;
+        width: min(100%, 320px);
+        margin-inline: auto;
+    }
+}
