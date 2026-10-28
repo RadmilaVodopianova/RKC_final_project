@@ -1760,3 +1760,100 @@ p {
         padding: 24px;
     }
 }
+
+/* Як зробити заявку */
+
+.order-guide {
+    border-bottom: 1px solid var(--light);
+}
+
+.order-guide-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.order-guide-step {
+    position: relative;
+    min-width: 0;
+    padding-right: 18px;
+}
+
+.order-guide-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 24px;
+    right: 0;
+    left: 64px;
+    height: 1px;
+    background: var(--gold);
+}
+
+.order-guide-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
+    color: var(--cream);
+    background: var(--burgundy);
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.order-guide-step h3 {
+    margin: 0 0 12px;
+    color: var(--burgundy);
+    font-size: 24px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.order-guide-step p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.order-guide .order-guide-note {
+    margin: 28px 0 20px;
+    font-size: 14px;
+}
+
+.order-guide .button:focus-visible {
+    outline-color: var(--burgundy);
+}
+
+@media (max-width: 800px) {
+    .order-guide-steps {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .order-guide-step {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        column-gap: 16px;
+        padding: 0;
+    }
+
+    .order-guide-step::after {
+        display: none;
+    }
+
+    .order-guide-number {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        margin: 0;
+    }
+
+    .order-guide-step h3,
+    .order-guide-step p {
+        grid-column: 2;
+    }
+}
