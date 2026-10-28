@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.db import transaction
+from django.db.models import Count
 
 from .models import Order, OrderItem
 
@@ -29,10 +30,12 @@ class OrderAdmin(admin.ModelAdmin):
         "full_name",
         "phone",
         "status",
+        "item_count",
         "created_at",
     )
 
     list_filter = ("status", "created_at")
+    date_hierarchy = "created_at"
 
     search_fields = (
         "=id",
@@ -69,6 +72,15 @@ class OrderAdmin(admin.ModelAdmin):
         "mark_confirmed",
         "mark_cancelled",
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _item_count=Count("items"),
+        )
+
+    @admin.display(description="Позицій", ordering="_item_count")
+    def item_count(self, obj):
+        return obj._item_count
 
     def _set_status(self, request, queryset, status):
         updated_count = 0
