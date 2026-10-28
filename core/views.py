@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -100,6 +101,9 @@ def catalog(request):
             category__slug=selected_category
         )
 
+    paginator = Paginator(products, 24)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     favorite_product_ids = set()
 
     if request.user.is_authenticated:
@@ -110,7 +114,8 @@ def catalog(request):
         )
 
     context = {
-        "products": products,
+        "products": page_obj,
+        "page_obj": page_obj,
         "categories": categories,
         "query": query,
         "selected_category": selected_category,
