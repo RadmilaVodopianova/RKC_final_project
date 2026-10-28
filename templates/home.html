@@ -12,7 +12,7 @@
     >
 
     <div class="container hero-actions">
-        <a class="button" href="/catalog/">Переглянути каталог</a>
+        <a class="button" href="{% url 'catalog' %}">Переглянути каталог</a>
     </div>
 </section>
 
@@ -31,7 +31,7 @@
             погодивши асортимент і строки виготовлення з менеджером.
         </p>
 
-        <a class="text-link" href="/about/">Більше про підприємство →</a>
+        <a class="text-link" href="{% url 'about' %}">Більше про підприємство →</a>
     </div>
 </section>
 
@@ -46,25 +46,25 @@
         </p>
 
         <div class="category-grid">
-            <a class="category-card" href="/catalog/?category=vareni">
+            <a class="category-card" href="{% url 'catalog' %}?category=vareni">
                 Варені
             </a>
-            <a class="category-card" href="/catalog/?category=grill">
+            <a class="category-card" href="{% url 'catalog' %}?category=grill">
                 Ковбаски для гриля
             </a>
-            <a class="category-card" href="/catalog/?category=kopchenosti">
+            <a class="category-card" href="{% url 'catalog' %}?category=kopchenosti">
                 Копченості
             </a>
-            <a class="category-card" href="/catalog/?category=napivkopcheni">
+            <a class="category-card" href="{% url 'catalog' %}?category=napivkopcheni">
                 Напівкопчені
             </a>
-            <a class="category-card" href="/catalog/?category=sardelky">
+            <a class="category-card" href="{% url 'catalog' %}?category=sardelky">
                 Сардельки
             </a>
-            <a class="category-card" href="/catalog/?category=syrokopcheni">
+            <a class="category-card" href="{% url 'catalog' %}?category=syrokopcheni">
                 Сирокопчені
             </a>
-            <a class="category-card" href="/catalog/?category=sosysky">
+            <a class="category-card" href="{% url 'catalog' %}?category=sosysky">
                 Сосиски
             </a>
         </div>

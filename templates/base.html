@@ -61,16 +61,16 @@
         <div class="header-actions">
 
             {% if user.is_authenticated %}
-                <a href="/account/">
+                <a href="{% url 'account' %}">
                     Особистий кабінет
                 </a>
             {% else %}
-                <a href="/accounts/login/">
+                <a href="{% url 'login' %}">
                     Увійти
                 </a>
             {% endif %}
 
-            <a class="cart-link" href="/cart/">
+            <a class="cart-link" href="{% url 'cart_detail' %}">
                 Кошик заявки
             </a>
 
