@@ -8,10 +8,6 @@
         <div class="auth-card">
             <h1>Заявка №{{ order.customer_number }}</h1>
 
-            {% for message in messages %}
-                <p role="status">{{ message }}</p>
-            {% endfor %}
-
             <p>
                 <strong>Дата створення:</strong>
                 {{ order.created_at|date:"d.m.Y H:i" }}

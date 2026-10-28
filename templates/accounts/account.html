@@ -13,10 +13,6 @@
                 Вітаємо, {{ user.first_name|default:user.email }}!
             </p>
 
-            {% for message in messages %}
-            <p role="status">{{ message }}</p>
-            {% endfor %}
-
             <!-- НАВІГАЦІЯ -->
             <div class="account-tabs" aria-label="Розділи кабінету">
 

@@ -12,10 +12,6 @@
             Наявність і строки виготовлення уточнюються у менеджера.
         </p>
 
-        {% for message in messages %}
-            <p role="status">{{ message }}</p>
-        {% endfor %}
-
         {% if items %}
             <div class="cart-items">
                 {% for item in items %}
