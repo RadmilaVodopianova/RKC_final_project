@@ -1,6 +1,6 @@
 
 {% extends "base.html" %}
-{% load static %}
+{% load static catalog_images %}
 
 {% block title %}Каталог | Роздільнянський ковбасний цех{% endblock %}
 
@@ -140,8 +140,11 @@
                         <div class="product-card-image">
 
                             {% if product.image %}
+                                {% catalog_thumbnail product.image as thumbnail %}
                                 <img
-                                    src="{{ product.image.url }}"
+                                    src="{{ thumbnail.src }}"
+                                    srcset="{{ thumbnail.srcset }}"
+                                    sizes="{{ thumbnail.sizes }}"
                                     alt="{{ product.name }}"
                                     width="400"
                                     height="500"

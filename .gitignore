@@ -7,3 +7,4 @@ __pycache__/
 .env.*
 !.env.example
 db.sqlite3
+media/catalog_thumbnails/
