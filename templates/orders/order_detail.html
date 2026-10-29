@@ -5,7 +5,7 @@
 {% block content %}
 <section class="section">
     <div class="container">
-        <div class="auth-card">
+        <div class="auth-card order-detail-card">
             <h1>Заявка №{{ order.customer_number }}</h1>
 
             <p>
@@ -15,8 +15,47 @@
 
             <p>
                 <strong>Статус:</strong>
-                {{ order.get_status_display }}
+                <span class="order-status order-status--{{ order.status }}">
+                    {{ order.get_status_display }}
+                </span>
             </p>
+
+            {% if order.status == 'cancelled' %}
+                <p class="order-cancelled-note">
+                    Заявку скасовано. Подальше опрацювання припинено.
+                </p>
+            {% else %}
+                <ol class="order-progress" aria-label="Етапи заявки" role="list">
+                    <li
+                        class="order-step{% if order.status == 'new' %} is-current{% elif order.status != 'new' %} is-reached{% endif %}"
+                        {% if order.status == 'new' %}aria-current="step"{% endif %}
+                    >
+                        <span class="order-step-number" aria-hidden="true">1</span>
+                        <span>Нова</span>
+                    </li>
+                    <li
+                        class="order-step{% if order.status == 'processing' %} is-current{% elif order.status == 'confirmed' or order.status == 'completed' %} is-reached{% endif %}"
+                        {% if order.status == 'processing' %}aria-current="step"{% endif %}
+                    >
+                        <span class="order-step-number" aria-hidden="true">2</span>
+                        <span>В обробці</span>
+                    </li>
+                    <li
+                        class="order-step{% if order.status == 'confirmed' %} is-current{% elif order.status == 'completed' %} is-reached{% endif %}"
+                        {% if order.status == 'confirmed' %}aria-current="step"{% endif %}
+                    >
+                        <span class="order-step-number" aria-hidden="true">3</span>
+                        <span>Погоджена</span>
+                    </li>
+                    <li
+                        class="order-step{% if order.status == 'completed' %} is-current{% endif %}"
+                        {% if order.status == 'completed' %}aria-current="step"{% endif %}
+                    >
+                        <span class="order-step-number" aria-hidden="true">4</span>
+                        <span>Виконана</span>
+                    </li>
+                </ol>
+            {% endif %}
 
             <h2>Товари у заявці</h2>
 
