@@ -2491,3 +2491,8 @@ p {
         transform: scale(1.035);
     }
 }
+
+/* Окремі слова зберігають звичне компонування заголовка hero. */
+.hero-title .hero-word {
+    display: inline-block;
+}

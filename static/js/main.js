@@ -101,6 +101,20 @@ if (document.querySelector(".hero") && window.gsap && window.ScrollTrigger) {
 
     revealMedia.add("(prefers-reduced-motion: no-preference)", () => {
         document.documentElement.classList.add("js-enabled");
+
+        const hero = document.querySelector(".hero");
+        if (!revealedElements.has(hero)) {
+            gsap.from(hero.querySelectorAll(".hero-word"), {
+                y: 24,
+                opacity: 0,
+                duration: 0.75,
+                stagger: 0.12,
+                ease: "power2.out",
+                clearProps: "transform,opacity",
+                onComplete: () => revealedElements.add(hero)
+            });
+        }
+
         const gridSelector = ".benefits-grid, .category-grid, " +
             "#featured-products .catalog-products, .order-guide-steps";
 
@@ -146,4 +160,24 @@ if (document.querySelector(".hero") && window.gsap && window.ScrollTrigger) {
 
         return () => document.documentElement.classList.remove("js-enabled");
     });
+
+    revealMedia.add(
+        "(min-width: 1001px) and (prefers-reduced-motion: no-preference)",
+        () => {
+            gsap.fromTo(".hero-banner", {
+                scale: 1.08,
+                y: -12
+            }, {
+                scale: 1.08,
+                y: 12,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 0.5
+                }
+            });
+        }
+    );
 }
