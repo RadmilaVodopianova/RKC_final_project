@@ -2461,3 +2461,33 @@ p {
         transition: none;
     }
 }
+
+/* Рух карток товарів: миша та клавіатура */
+
+@media (prefers-reduced-motion: no-preference) {
+    .catalog-products-framed .product-card {
+        transition: transform 200ms ease;
+    }
+
+    .catalog-products-framed .product-card-image img {
+        transition: transform 300ms ease;
+    }
+
+    .catalog-products-framed .product-card:focus-within {
+        transform: translateY(-4px);
+    }
+
+    .catalog-products-framed .product-card:focus-within .product-card-image img {
+        transform: scale(1.035);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+    .catalog-products-framed .product-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .catalog-products-framed .product-card:hover .product-card-image img {
+        transform: scale(1.035);
+    }
+}
