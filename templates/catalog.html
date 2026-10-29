@@ -16,6 +16,32 @@
             можливість і строки виготовлення уточнюйте у менеджера.
         </p>
 
+        <nav class="catalog-category-nav" aria-label="Категорії продукції">
+            <ul class="catalog-category-list" role="list">
+                <li>
+                    <a
+                        class="catalog-category-chip{% if not selected_category %} is-active{% endif %}"
+                        href="{% url 'catalog' %}{% querystring category=None page=None %}"
+                        {% if not selected_category %}aria-current="true"{% endif %}
+                    >
+                        Усі категорії
+                    </a>
+                </li>
+
+                {% for category in categories %}
+                    <li>
+                        <a
+                            class="catalog-category-chip{% if selected_category == category.slug %} is-active{% endif %}"
+                            href="{% url 'catalog' %}{% querystring category=category.slug page=None %}"
+                            {% if selected_category == category.slug %}aria-current="true"{% endif %}
+                        >
+                            {{ category.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
         <!-- ПОШУК І ФІЛЬТРАЦІЯ -->
         <form
             class="catalog-filters"
@@ -36,29 +62,9 @@
                 >
             </div>
 
-            <div class="filter-field">
-                <label for="catalog-category">
-                    Підгрупа продукції
-                </label>
-
-                <select
-                    id="catalog-category"
-                    name="category"
-                >
-                    <option value="">
-                        Усі підгрупи
-                    </option>
-
-                    {% for category in categories %}
-                        <option
-                            value="{{ category.slug }}"
-                            {% if selected_category == category.slug %}selected{% endif %}
-                        >
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
 
             <button class="button" type="submit">
                 Знайти
