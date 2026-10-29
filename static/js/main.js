@@ -272,8 +272,144 @@ function enhanceSiteMessage(message) {
 document.querySelectorAll(".site-message").forEach(enhanceSiteMessage);
 messageMotion.addEventListener("change", (event) => {
     if (event.matches) {
-        document.querySelectorAll(".site-message").forEach((message) => {
+        document.querySelectorAll(".site-message, .cart-flight, .cart-count").forEach((message) => {
             message.getAnimations().forEach((animation) => animation.finish());
         });
     }
 });
+
+// Сповіщення для відповідей без перезавантаження; текст вставляємо без HTML.
+function showSiteMessage(text, kind = "success") {
+    let container = document.querySelector(".site-messages");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "site-messages container";
+        container.setAttribute("aria-label", "Повідомлення сайту");
+        document.querySelector("main").prepend(container);
+    }
+
+    const message = document.createElement("div");
+    message.className = "site-message " + (kind === "error" ? "error" : "success");
+    message.setAttribute("role", kind === "error" ? "alert" : "status");
+    const icon = document.createElement("span");
+    icon.className = "site-message-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = kind === "error" ? "!" : "✓";
+    const content = document.createElement("span");
+    content.className = "site-message-text";
+    content.textContent = text;
+    message.append(icon, content);
+    container.append(message);
+    enhanceSiteMessage(message);
+}
+
+function animateCartAddition(form) {
+    if (messageMotion.matches || !Element.prototype.animate) {
+        return;
+    }
+    const counter = document.querySelector("#cart-count");
+    if (!counter) {
+        return;
+    }
+    counter.animate([
+        { transform: "scale(1)" },
+        { transform: "scale(1.2)" },
+        { transform: "scale(1)" }
+    ], { duration: 320, easing: "ease-out" });
+
+    const product = form.closest(".product-card, .product-detail");
+    const image = product?.querySelector(".product-card-image img, .product-detail-photo img");
+    if (!image) {
+        return;
+    }
+    const imageBounds = image.getBoundingClientRect();
+    const imageCenterY = imageBounds.top + imageBounds.height / 2;
+    const headerBottom = document.querySelector(".site-header")?.getBoundingClientRect().bottom || 0;
+    const origin = imageCenterY < headerBottom || imageCenterY > innerHeight
+        ? form.querySelector('button[type="submit"]').getBoundingClientRect()
+        : imageBounds;
+    const destination = counter.getBoundingClientRect();
+    if (destination.bottom < 0 || destination.top > innerHeight) {
+        return;
+    }
+    const startX = Math.max(40, Math.min(innerWidth - 40, origin.left + origin.width / 2));
+    const startY = Math.max(50, Math.min(innerHeight - 50, origin.top + origin.height / 2));
+    const deltaX = destination.left + destination.width / 2 - startX;
+    const deltaY = destination.top + destination.height / 2 - startY;
+    const flight = document.createElement("img");
+    flight.src = image.currentSrc || image.src;
+    flight.alt = "";
+    flight.setAttribute("aria-hidden", "true");
+    flight.className = "cart-flight";
+    flight.style.left = (startX - 40) + "px";
+    flight.style.top = (startY - 50) + "px";
+    document.body.append(flight);
+    flight.animate([
+        { transform: "translate(0, 0) scale(1)", opacity: 0.95 },
+        { transform: `translate(${deltaX * 0.5}px, ${deltaY * 0.5 - 40}px) scale(0.65)`, opacity: 0.8 },
+        { transform: `translate(${deltaX}px, ${deltaY}px) scale(0.15)`, opacity: 0 }
+    ], { duration: 650, easing: "ease-in-out", fill: "forwards" })
+        .finished.then(() => flight.remove(), () => flight.remove());
+}
+
+// Одна черга запитів запобігає одночасному перезаписуванню сесії кошика.
+let cartAddQueue = Promise.resolve();
+if (window.fetch && window.FormData) {
+    document.querySelectorAll(".product-card-cart, .product-request-form").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (form.dataset.submitting === "true") {
+                return;
+            }
+            const button = event.submitter || form.querySelector('button[type="submit"]');
+            const body = new FormData(form);
+            const originalText = button.textContent;
+            form.dataset.submitting = "true";
+            form.setAttribute("aria-busy", "true");
+            button.disabled = true;
+            button.textContent = "Додаємо…";
+
+            cartAddQueue = cartAddQueue.then(async () => {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRFToken": body.get("csrfmiddlewaretoken")
+                    },
+                    body
+                });
+                if (!response.headers.get("Content-Type")?.includes("application/json")) {
+                    showSiteMessage(response.status === 404
+                        ? "Товар більше недоступний. Оновіть каталог."
+                        : "Не вдалося додати товар. Оновіть сторінку та перевірте кошик.", "error");
+                    return;
+                }
+                const result = await response.json();
+                if (!response.ok || !result.ok) {
+                    showSiteMessage(result.message || "Не вдалося додати товар.", "error");
+                    return;
+                }
+                const counter = document.querySelector("#cart-count");
+                if (counter) {
+                    counter.textContent = String(result.cart_count);
+                }
+                document.querySelector(".cart-link")?.setAttribute(
+                    "aria-label", "Кошик заявки. Кількість позицій: " + result.cart_count
+                );
+                showSiteMessage(result.message);
+                animateCartAddition(form);
+            }).catch(() => {
+                showSiteMessage(
+                    "Не вдалося підтвердити додавання. Перевірте кошик перед повторною спробою.",
+                    "error"
+                );
+            }).finally(() => {
+                button.disabled = false;
+                button.textContent = originalText;
+                form.removeAttribute("aria-busy");
+                delete form.dataset.submitting;
+            });
+        });
+    });
+}

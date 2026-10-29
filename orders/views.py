@@ -3,12 +3,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Max
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from core.models import Product
 
 from .cart import Cart
+from .context_processors import cart_counter
 from .forms import CartQuantityForm, OrderCreateForm
 from .models import Order, OrderItem
 
@@ -40,6 +42,7 @@ def cart_add(request, product_id):
         is_active=True,
     )
     form = CartQuantityForm(request.POST)
+    errors = []
 
     if form.is_valid():
         try:
@@ -49,13 +52,25 @@ def cart_add(request, product_id):
                 form.cleaned_data["unit"],
             )
         except ValueError as error:
-            messages.error(request, str(error))
-        else:
-            messages.success(request, "Товар додано до кошика.")
+            errors.append(str(error))
     else:
-        for errors in form.errors.values():
-            for error in errors:
-                messages.error(request, error)
+        errors = [str(error) for field_errors in form.errors.values() for error in field_errors]
+
+    if "application/json" in request.headers.get("Accept", "").lower():
+        return JsonResponse(
+            {
+                "ok": not errors,
+                "message": "Товар додано до кошика." if not errors else " ".join(errors),
+                "cart_count": cart_counter(request)["cart_item_count"],
+            },
+            status=400 if errors else 200,
+        )
+
+    if errors:
+        for error in errors:
+            messages.error(request, error)
+    else:
+        messages.success(request, "Товар додано до кошика.")
 
     return redirect("cart_detail")
 
