@@ -1,3 +1,5 @@
+import random
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -28,11 +30,40 @@ def home(request):
         )
     )
 
-    featured_products = (
+    active_products = list(
+        Product.objects.filter(is_active=True)
+        .values_list("pk", "category_id")
+    )
+    random.shuffle(active_products)
+
+    category_product_ids = {}
+    for product_id, category_id in active_products:
+        category_product_ids.setdefault(category_id, product_id)
+
+    selected_ids = random.sample(
+        list(category_product_ids.values()),
+        min(8, len(category_product_ids)),
+    )
+    remaining_ids = [
+        product_id
+        for product_id, category_id in active_products
+        if product_id not in selected_ids
+    ]
+    selected_ids.extend(
+        random.sample(remaining_ids, min(8 - len(selected_ids), len(remaining_ids)))
+    )
+    random.shuffle(selected_ids)
+
+    products_by_id = (
         Product.objects.filter(is_active=True)
         .select_related("category")
-        .order_by("pk")[:8]
+        .in_bulk(selected_ids)
     )
+    featured_products = [
+        products_by_id[product_id]
+        for product_id in selected_ids
+        if product_id in products_by_id
+    ]
 
     return render(
         request,
