@@ -84,7 +84,7 @@
         </p>
 
         <!-- КАТАЛОГ ПРОДУКЦІЇ -->
-        <div class="catalog-products catalog-products-framed">
+        <div class="catalog-products catalog-products-framed catalog-quick-add">
 
             {% for product in products %}
 
@@ -173,6 +173,27 @@
                         </div>
 
                     </a>
+
+                    <form
+                        class="product-card-cart"
+                        method="post"
+                        action="{% url 'cart_add' product.pk %}"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <select
+                            name="unit"
+                            aria-label="Кількість та одиниця виміру для {{ product.name }}"
+                        >
+                            <option value="kg">1 кг</option>
+                            <option value="pcs">1 шт</option>
+                        </select>
+                        <button
+                            class="button"
+                            type="submit"
+                            aria-label="Додати {{ product.name }} до заявки"
+                        >У заявку</button>
+                    </form>
 
                 </article>
 
