@@ -2309,3 +2309,124 @@ p {
     opacity: 0.5;
     cursor: default;
 }
+
+/* Статуси та етапи заявки */
+
+.order-status {
+    display: inline-block;
+    max-width: 100%;
+    padding: 6px 12px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: var(--text);
+    background: var(--light);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.order-status--new {
+    color: #344b68;
+    background: #edf3fb;
+}
+
+.order-status--processing {
+    color: #704500;
+    background: #fff0cc;
+}
+
+.order-status--confirmed {
+    color: #315b33;
+    background: #edf5e6;
+}
+
+.order-status--completed {
+    color: #185347;
+    background: #e4f3ed;
+}
+
+.order-status--cancelled {
+    color: var(--burgundy);
+    background: #fbe9e9;
+}
+
+.auth-card.order-detail-card {
+    max-width: 880px;
+    overflow-wrap: anywhere;
+}
+
+.order-progress {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.order-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 8px;
+    border-top: 3px solid var(--light);
+    color: var(--text);
+    text-align: center;
+    font-size: 14px;
+}
+
+.order-step-number {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: var(--cream);
+    font-weight: 700;
+}
+
+.order-step.is-reached {
+    border-color: var(--gold);
+}
+
+.order-step.is-reached .order-step-number {
+    background: var(--light);
+}
+
+.order-step.is-current {
+    border-color: var(--burgundy);
+    color: var(--burgundy);
+    font-weight: 700;
+}
+
+.order-step.is-current .order-step-number {
+    border-color: var(--burgundy);
+    color: var(--cream);
+    background: var(--burgundy);
+}
+
+.order-cancelled-note {
+    padding: 16px;
+    border-left: 4px solid var(--burgundy);
+    border-radius: 8px;
+    color: var(--burgundy);
+    background: #fbe9e9;
+}
+
+@media (max-width: 600px) {
+    .order-progress {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .order-step {
+        flex-direction: row;
+        padding: 10px 12px;
+        border-top: 0;
+        border-left: 3px solid var(--light);
+        text-align: left;
+    }
+}
