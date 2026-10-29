@@ -39,3 +39,38 @@ if (productQuantityInput && productUnitSelect) {
     productUnitSelect.addEventListener("change", updateQuantityRules);
     window.addEventListener("pageshow", updateQuantityRules);
 }
+
+// Кнопки кількості в кошику використовують min, max і step самого поля.
+document.querySelectorAll("[data-quantity-control]").forEach((control) => {
+    const input = control.querySelector('input[type="number"]');
+    const decrease = control.querySelector('[data-quantity-change="-1"]');
+    const increase = control.querySelector('[data-quantity-change="1"]');
+
+    if (!input || !decrease || !increase) {
+        return;
+    }
+
+    const updateButtons = () => {
+        const value = input.valueAsNumber;
+        decrease.disabled = Number.isFinite(value) && value <= Number(input.min);
+        increase.disabled = Number.isFinite(value) && value >= Number(input.max);
+    };
+
+    [decrease, increase].forEach((button) => {
+        button.addEventListener("click", () => {
+            if (!Number.isFinite(input.valueAsNumber)) {
+                input.value = input.min;
+            } else {
+                input.stepUp(Number(button.dataset.quantityChange));
+            }
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        button.hidden = false;
+    });
+
+    control.classList.add("is-enhanced");
+    input.addEventListener("input", updateButtons);
+    input.addEventListener("change", updateButtons);
+    window.addEventListener("pageshow", updateButtons);
+    updateButtons();
+});

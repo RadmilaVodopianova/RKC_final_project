@@ -52,16 +52,32 @@
                                         <label for="quantity-{{ item.product.pk }}-{{ item.unit }}">
                                             Кількість, {{ item.unit_label }}
                                         </label>
-                                        <input
-                                            type="number"
-                                            id="quantity-{{ item.product.pk }}-{{ item.unit }}"
-                                            name="quantity"
-                                            value="{% if item.unit == 'pcs' %}{{ item.quantity|floatformat:'0u' }}{% else %}{{ item.quantity|stringformat:'.2f' }}{% endif %}"
-                                            min="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
-                                            max="1000"
-                                            step="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
-                                            required
-                                        >
+                                        <div class="cart-quantity-control" data-quantity-control>
+                                            <button
+                                                class="cart-quantity-button"
+                                                type="button"
+                                                data-quantity-change="-1"
+                                                aria-label="Зменшити кількість: {{ item.product.name }}, {{ item.unit_label }}"
+                                                hidden
+                                            >−</button>
+                                            <input
+                                                type="number"
+                                                id="quantity-{{ item.product.pk }}-{{ item.unit }}"
+                                                name="quantity"
+                                                value="{% if item.unit == 'pcs' %}{{ item.quantity|floatformat:'0u' }}{% else %}{{ item.quantity|stringformat:'.2f' }}{% endif %}"
+                                                min="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
+                                                max="1000"
+                                                step="{% if item.unit == 'pcs' %}1{% else %}0.01{% endif %}"
+                                                required
+                                            >
+                                            <button
+                                                class="cart-quantity-button"
+                                                type="button"
+                                                data-quantity-change="1"
+                                                aria-label="Збільшити кількість: {{ item.product.name }}, {{ item.unit_label }}"
+                                                hidden
+                                            >+</button>
+                                        </div>
                                     </div>
                                     <button class="button" type="submit">Оновити кількість</button>
                                 </form>

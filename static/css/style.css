@@ -2261,3 +2261,51 @@ p {
         width: 100px;
     }
 }
+
+/* Кнопки кількості в кошику */
+
+.cart-page .cart-update-form .auth-field {
+    width: 220px;
+    max-width: 100%;
+}
+
+.cart-quantity-control.is-enhanced {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cart-quantity-control.is-enhanced input {
+    min-width: 0;
+    flex: 1 1 0;
+}
+
+.cart-quantity-button {
+    flex: 0 0 44px;
+    min-width: 44px;
+    min-height: 46px;
+    padding: 8px;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    color: var(--burgundy);
+    background: var(--light);
+}
+
+.cart-quantity-button[hidden] {
+    display: none;
+}
+
+.cart-quantity-button:hover:not(:disabled) {
+    color: var(--cream);
+    background: var(--burgundy);
+}
+
+.cart-quantity-button:focus-visible {
+    outline: 3px solid var(--burgundy);
+    outline-offset: 3px;
+}
+
+.cart-quantity-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
