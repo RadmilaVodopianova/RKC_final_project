@@ -92,3 +92,58 @@ if (siteHeader) {
     desktopHeader.addEventListener("change", updateHeader);
     updateHeader();
 }
+
+// Поява блоків головної. Без бібліотек контент залишається видимим.
+if (document.querySelector(".hero") && window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    const revealMedia = gsap.matchMedia();
+    const revealedElements = new WeakSet();
+
+    revealMedia.add("(prefers-reduced-motion: no-preference)", () => {
+        document.documentElement.classList.add("js-enabled");
+        const gridSelector = ".benefits-grid, .category-grid, " +
+            "#featured-products .catalog-products, .order-guide-steps";
+
+        const reveal = (element, staggerChildren = false) => {
+            if (revealedElements.has(element)) {
+                return;
+            }
+
+            const timeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 92%",
+                    once: true
+                },
+                onComplete: () => revealedElements.add(element)
+            });
+
+            timeline.from(element, {
+                y: 20,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power2.out",
+                clearProps: "transform,opacity"
+            });
+
+            if (staggerChildren) {
+                timeline.from(element.children, {
+                    opacity: 0,
+                    duration: 0.4,
+                    stagger: 0.06,
+                    ease: "power2.out",
+                    clearProps: "opacity"
+                }, 0);
+            }
+        };
+
+        document.querySelectorAll(gridSelector).forEach((grid) => reveal(grid, true));
+        document.querySelectorAll("main .section").forEach((section) => {
+            if (!section.querySelector(gridSelector)) {
+                reveal(section);
+            }
+        });
+
+        return () => document.documentElement.classList.remove("js-enabled");
+    });
+}
