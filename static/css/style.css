@@ -1906,3 +1906,21 @@ p {
     outline: 3px solid var(--burgundy);
     outline-offset: 3px;
 }
+
+/* Стилі кнопок обраного в каталозі замість inline-атрибутів */
+
+.catalog-products-framed .favorite-button {
+    width: 42px;
+    height: 42px;
+    padding: 8px;
+    background: #fff;
+}
+
+.catalog-products-framed .favorite-button img {
+    display: block;
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    object-fit: contain;
+}
