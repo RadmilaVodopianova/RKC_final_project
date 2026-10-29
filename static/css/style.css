@@ -2430,3 +2430,34 @@ p {
         text-align: left;
     }
 }
+
+/* Компактна шапка на широких екранах */
+
+@media (min-width: 1001px) {
+    .site-header,
+    .site-header .header-inner > *,
+    .site-header .brand-logo {
+        transition: transform 180ms ease;
+    }
+
+    .site-header.is-compact {
+        transform: translateY(-20px);
+        box-shadow: 0 8px 20px rgba(84, 8, 16, 0.14);
+    }
+
+    .site-header.is-compact .header-inner > * {
+        transform: translateY(10px);
+    }
+
+    .site-header.is-compact .brand-logo {
+        transform: scale(0.8);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .site-header .header-inner > *,
+    .site-header .brand-logo {
+        transition: none;
+    }
+}

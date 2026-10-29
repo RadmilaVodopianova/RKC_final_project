@@ -74,3 +74,21 @@ document.querySelectorAll("[data-quantity-control]").forEach((control) => {
     window.addEventListener("pageshow", updateButtons);
     updateButtons();
 });
+
+// Компактна шапка без зміни висоти елемента в потоці сторінки.
+const siteHeader = document.querySelector(".site-header");
+
+if (siteHeader) {
+    const desktopHeader = window.matchMedia("(min-width: 1001px)");
+    const updateHeader = () => {
+        siteHeader.classList.toggle(
+            "is-compact",
+            desktopHeader.matches && window.scrollY > 160
+        );
+    };
+
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    window.addEventListener("pageshow", updateHeader);
+    desktopHeader.addEventListener("change", updateHeader);
+    updateHeader();
+}
