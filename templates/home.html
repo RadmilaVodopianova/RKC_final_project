@@ -49,6 +49,27 @@
     </div>
 </section>
 
+{% if categories %}
+<div class="category-marquee" data-category-marquee tabindex="0" role="region" aria-label="Категорії продукції">
+    <div class="container category-marquee-inner">
+        <div class="category-marquee-viewport" aria-hidden="true">
+            <div class="category-marquee-track" id="category-marquee-track">
+                <div class="category-marquee-group">
+                    {% for category in categories %}
+                        <span class="category-marquee-item">{{ category.name }}</span>
+                    {% endfor %}
+                </div>
+                <div class="category-marquee-group category-marquee-copy">
+                    {% for category in categories %}
+                        <span class="category-marquee-item">{{ category.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <section class="section">
     <div class="container">
         <h2>Роздільнянський ковбасний цех</h2>
