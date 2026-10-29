@@ -1,11 +1,16 @@
 from decimal import Decimal
+from unittest.mock import patch
 
-from django.test import Client, TestCase
+from django.contrib.auth import get_user_model
+from django.core import mail
+from django.core.exceptions import ValidationError
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Category, Product
 
 from .cart import Cart
+from .models import Order
 
 
 class CartAddResponseTests(TestCase):
@@ -100,3 +105,119 @@ class CartAddResponseTests(TestCase):
                                     {"quantity": "1", "unit": "kg"},
                                     HTTP_ACCEPT="application/json")
         self.assertEqual(response.json()["cart_count"], 1)
+
+
+@override_settings(
+    MAILERS={"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}},
+    DEFAULT_FROM_EMAIL="sender@example.test",
+    MANAGER_EMAIL="manager@example.test",
+)
+class ManagerOrderEmailTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="mail-customer", email="customer@example.test", password="Test-email-2026!",
+        )
+        self.client.force_login(self.user)
+        category = Category.objects.create(name="Для перевірки листів", slug="email-test")
+        self.product = Product.objects.create(category=category, name="Ковбаса тестова")
+        self.other = Product.objects.create(category=category, name="Сосиски тестові")
+        self.client.post(reverse("cart_add", args=[self.product.pk]),
+                         {"quantity": "1.25", "unit": "kg"}, HTTP_ACCEPT="application/json")
+        self.client.post(reverse("cart_add", args=[self.other.pk]),
+                         {"quantity": "2", "unit": "pcs"}, HTTP_ACCEPT="application/json")
+        self.payload = {
+            "full_name": "Тестовий клієнт", "email": "customer@example.test",
+            "phone": "+380000000000", "comment": "Тестовий коментар",
+        }
+
+    def create_order(self):
+        return self.client.post(reverse("order_create"), self.payload)
+
+    def test_sends_one_complete_email_after_commit(self):
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.create_order()
+        order = Order.objects.get(user=self.user)
+        self.assertRedirects(response, reverse("order_detail", args=[order.pk]))
+        self.assertEqual(len(callbacks), 1)
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, ["manager@example.test"])
+        self.assertEqual(message.from_email, "sender@example.test")
+        self.assertEqual(message.reply_to, ["customer@example.test"])
+        self.assertIn(f"№{order.customer_number}", message.subject)
+        self.assertIn(f"ID {order.pk}", message.subject)
+        for text in ("Ковбаса тестова — 1,25 кг", "Сосиски тестові — 2 шт",
+                     "customer@example.test", "+380000000000", "Тестовий коментар"):
+            self.assertIn(text, message.body)
+        self.assertFalse(self.client.session.get(Cart.SESSION_KEY))
+
+    def test_email_is_deferred_until_commit(self):
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            self.create_order()
+            self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(callbacks), 1)
+        callbacks[0]()
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_invalid_order_does_not_send_email(self):
+        self.payload["phone"] = "wrong"
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.create_order()
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Order.objects.exists())
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_anonymous_user_cannot_create_order_or_email(self):
+        self.client.logout()
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.create_order()
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Order.objects.exists())
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_resubmitting_empty_cart_does_not_duplicate_email(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+            self.create_order()
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_email_uses_saved_product_names(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+            self.product.name = "Нова назва товару"
+            self.product.save(update_fields=["name"])
+        self.assertIn("Ковбаса тестова", mail.outbox[0].body)
+        self.assertNotIn("Нова назва товару", mail.outbox[0].body)
+
+    def test_mail_failure_does_not_lose_order(self):
+        with patch("orders.views.EmailMessage.send", side_effect=OSError("QA mail unavailable")):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.create_order()
+        order = Order.objects.get(user=self.user)
+        self.assertRedirects(response, reverse("order_detail", args=[order.pk]))
+        self.assertEqual(order.items.count(), 2)
+        self.assertFalse(self.client.session.get(Cart.SESSION_KEY))
+
+    def test_rolled_back_order_does_not_send_email(self):
+        with patch("orders.views.OrderItem.full_clean", side_effect=ValidationError("QA rollback")):
+            with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                with self.assertLogs("django.request", level="ERROR"):
+                    with self.assertRaises(ValidationError):
+                        self.create_order()
+        self.assertFalse(Order.objects.exists())
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_viewing_and_editing_status_do_not_resend_manager_email(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+        order = Order.objects.get(user=self.user)
+        self.client.get(reverse("order_detail", args=[order.pk]))
+        order.status = Order.Status.PROCESSING
+        order.save(update_fields=["status", "updated_at"])
+        manager_messages = [message for message in mail.outbox if message.to == ["manager@example.test"]]
+        self.assertEqual(len(manager_messages), 1)

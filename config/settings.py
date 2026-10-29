@@ -133,6 +133,10 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+DEFAULT_FROM_EMAIL = "Роздільнянський ковбасний цех <rkcvk.rozdilna@gmail.com>"
+MANAGER_EMAIL = "rkcvk.rozdilna@gmail.com"
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
@@ -119,6 +121,34 @@ def cart_remove(request, product_id, unit):
     return redirect("cart_detail")
 
 
+def _send_order_created_email(order_id):
+    order = Order.objects.prefetch_related("items").get(pk=order_id)
+    lines = [
+        f"Отримано нову заявку №{order.customer_number}.",
+        f"Внутрішній ID заявки: {order.pk}",
+        f"Клієнт: {order.full_name}",
+        f"Електронна пошта: {order.email}",
+        f"Телефон: {order.phone}",
+        f"Статус: {order.get_status_display()}",
+        "",
+        "Товари у заявці:",
+    ]
+    for item in order.items.all():
+        quantity = format(item.quantity, ".0f" if item.unit == "pcs" else ".2f")
+        quantity = quantity.replace(".", ",")
+        lines.append(f"- {item.product_name} — {quantity} {item.get_unit_display()}")
+    if order.comment:
+        lines.extend(["", "Коментар клієнта:", order.comment])
+
+    EmailMessage(
+        subject=f"Нова заявка №{order.customer_number} (ID {order.pk})",
+        body="\n".join(lines),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[settings.MANAGER_EMAIL],
+        reply_to=[order.email],
+    ).send(using="default")
+
+
 @login_required
 def order_create(request):
     cart = Cart(request)
@@ -163,6 +193,11 @@ def order_create(request):
                     )
                     order_item.full_clean()
                     order_item.save()
+
+                transaction.on_commit(
+                    lambda order_id=order.pk: _send_order_created_email(order_id),
+                    robust=True,
+                )
 
             cart.clear()
 
