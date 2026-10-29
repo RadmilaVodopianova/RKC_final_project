@@ -225,11 +225,24 @@ document.querySelectorAll("[data-category-marquee]").forEach((marquee) => {
     updateMarquee();
 });
 
-// Сповіщення можна закрити; без JavaScript текст залишається видимим.
+// Повторні повідомлення об'єднуємо; одночасно показуємо максимум два.
 const messageMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const siteMessageControls = new WeakMap();
+
+function trimSiteMessages(container) {
+    const messages = Array.from(container.querySelectorAll(".site-message"));
+    messages.slice(0, Math.max(0, messages.length - 2)).forEach((message) => {
+        const controls = siteMessageControls.get(message);
+        if (controls) {
+            controls.remove();
+        } else {
+            message.remove();
+        }
+    });
+}
 
 function enhanceSiteMessage(message) {
-    if (message.querySelector(".site-message-close")) {
+    if (siteMessageControls.has(message)) {
         return;
     }
 
@@ -239,27 +252,42 @@ function enhanceSiteMessage(message) {
     closeButton.setAttribute("aria-label", "Закрити повідомлення");
     closeButton.textContent = "×";
     let dismissTimer;
+    const removeMessage = () => {
+        clearTimeout(dismissTimer);
+        siteMessageControls.delete(message);
+        message.remove();
+    };
     const dismissMessage = () => {
         clearTimeout(dismissTimer);
         if (closeButton.disabled) {
             return;
         }
         closeButton.disabled = true;
-        const removeMessage = () => message.remove();
         if (messageMotion.matches || !message.animate) {
             removeMessage();
             return;
         }
-
         message.animate([
             { opacity: 1, transform: "translateY(0)" },
             { opacity: 0, transform: "translateY(12px)" }
         ], { duration: 180, easing: "ease-in", fill: "forwards" })
             .finished.then(removeMessage, removeMessage);
     };
+    const restartTimer = () => {
+        clearTimeout(dismissTimer);
+        dismissTimer = setTimeout(dismissMessage, 60000);
+    };
+    siteMessageControls.set(message, {
+        refresh: restartTimer,
+        remove: () => {
+            clearTimeout(dismissTimer);
+            message.getAnimations?.().forEach((animation) => animation.cancel());
+            removeMessage();
+        }
+    });
     closeButton.addEventListener("click", dismissMessage);
-    dismissTimer = setTimeout(dismissMessage, 60000);
     message.append(closeButton);
+    restartTimer();
 
     if (!messageMotion.matches && message.animate) {
         message.animate([
@@ -269,7 +297,18 @@ function enhanceSiteMessage(message) {
     }
 }
 
-document.querySelectorAll(".site-message").forEach(enhanceSiteMessage);
+document.querySelectorAll(".site-messages").forEach((container) => {
+    const seen = new Map();
+    container.querySelectorAll(".site-message").forEach((message) => {
+        const text = message.querySelector(".site-message-text")?.textContent.trim() || "";
+        const key = message.className + ":" + text;
+        seen.get(key)?.remove();
+        seen.set(key, message);
+    });
+    trimSiteMessages(container);
+    container.querySelectorAll(".site-message").forEach(enhanceSiteMessage);
+});
+
 messageMotion.addEventListener("change", (event) => {
     if (event.matches) {
         document.querySelectorAll(".site-message, .cart-flight, .cart-count").forEach((message) => {
@@ -278,8 +317,8 @@ messageMotion.addEventListener("change", (event) => {
     }
 });
 
-// Сповіщення для відповідей без перезавантаження; текст вставляємо без HTML.
 function showSiteMessage(text, kind = "success") {
+    kind = kind === "error" ? "error" : "success";
     let container = document.querySelector(".site-messages");
     if (!container) {
         container = document.createElement("div");
@@ -288,8 +327,20 @@ function showSiteMessage(text, kind = "success") {
         document.querySelector("main").prepend(container);
     }
 
+    const existing = Array.from(container.querySelectorAll(".site-message")).find((message) => {
+        return message.classList.contains(kind) &&
+            message.querySelector(".site-message-text")?.textContent === text &&
+            !message.querySelector(".site-message-close")?.disabled;
+    });
+    if (existing) {
+        enhanceSiteMessage(existing);
+        siteMessageControls.get(existing).refresh();
+        container.append(existing);
+        return;
+    }
+
     const message = document.createElement("div");
-    message.className = "site-message " + (kind === "error" ? "error" : "success");
+    message.className = "site-message " + kind;
     message.setAttribute("role", kind === "error" ? "alert" : "status");
     const icon = document.createElement("span");
     icon.className = "site-message-icon";
@@ -301,6 +352,7 @@ function showSiteMessage(text, kind = "success") {
     message.append(icon, content);
     container.append(message);
     enhanceSiteMessage(message);
+    trimSiteMessages(container);
 }
 
 function animateCartAddition(form) {
