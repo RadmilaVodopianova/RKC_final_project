@@ -224,3 +224,56 @@ document.querySelectorAll("[data-category-marquee]").forEach((marquee) => {
     }
     updateMarquee();
 });
+
+// Сповіщення можна закрити; без JavaScript текст залишається видимим.
+const messageMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function enhanceSiteMessage(message) {
+    if (message.querySelector(".site-message-close")) {
+        return;
+    }
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "site-message-close";
+    closeButton.setAttribute("aria-label", "Закрити повідомлення");
+    closeButton.textContent = "×";
+    let dismissTimer;
+    const dismissMessage = () => {
+        clearTimeout(dismissTimer);
+        if (closeButton.disabled) {
+            return;
+        }
+        closeButton.disabled = true;
+        const removeMessage = () => message.remove();
+        if (messageMotion.matches || !message.animate) {
+            removeMessage();
+            return;
+        }
+
+        message.animate([
+            { opacity: 1, transform: "translateY(0)" },
+            { opacity: 0, transform: "translateY(12px)" }
+        ], { duration: 180, easing: "ease-in", fill: "forwards" })
+            .finished.then(removeMessage, removeMessage);
+    };
+    closeButton.addEventListener("click", dismissMessage);
+    dismissTimer = setTimeout(dismissMessage, 60000);
+    message.append(closeButton);
+
+    if (!messageMotion.matches && message.animate) {
+        message.animate([
+            { opacity: 0, transform: "translateY(12px)" },
+            { opacity: 1, transform: "translateY(0)" }
+        ], { duration: 220, easing: "ease-out" });
+    }
+}
+
+document.querySelectorAll(".site-message").forEach(enhanceSiteMessage);
+messageMotion.addEventListener("change", (event) => {
+    if (event.matches) {
+        document.querySelectorAll(".site-message").forEach((message) => {
+            message.getAnimations().forEach((animation) => animation.finish());
+        });
+    }
+});
