@@ -28,7 +28,20 @@ def home(request):
         )
     )
 
-    return render(request, "home.html", {"categories": categories})
+    featured_products = (
+        Product.objects.filter(is_active=True)
+        .select_related("category")
+        .order_by("pk")[:8]
+    )
+
+    return render(
+        request,
+        "home.html",
+        {
+            "categories": categories,
+            "featured_products": featured_products,
+        },
+    )
 
 
 # =========================
