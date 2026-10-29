@@ -2678,3 +2678,22 @@ p {
     font-size: 14px;
     text-align: center;
 }
+
+/* Мініатюра під час додавання до кошика */
+.cart-flight {
+    position: fixed;
+    z-index: 220;
+    width: 80px;
+    height: 100px;
+    max-width: none;
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.product-card-cart .button:disabled,
+.product-request-form .button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
