@@ -47,6 +47,13 @@ urlpatterns = [
         name="order_repeat",
     ),
 
+    # Скасування нової заявки її власником
+    path(
+        "orders/<int:pk>/cancel/",
+        views.order_cancel,
+        name="order_cancel",
+    ),
+
     # Деталі заявки
     path(
         "orders/<int:pk>/",

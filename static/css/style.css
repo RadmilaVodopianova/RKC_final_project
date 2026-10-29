@@ -2697,3 +2697,25 @@ p {
     opacity: 0.65;
     cursor: wait;
 }
+
+/* Скасування нової заявки */
+.order-cancel-form {
+    margin-block: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gold);
+}
+
+.order-cancel-form p {
+    font-size: 14px;
+}
+
+.order-cancel-button {
+    border: 1px solid var(--burgundy);
+    color: var(--burgundy);
+    background: transparent;
+}
+
+.order-cancel-button:hover {
+    color: var(--burgundy);
+    background: var(--light);
+}
