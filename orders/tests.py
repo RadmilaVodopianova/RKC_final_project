@@ -1,14 +1,19 @@
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.apps import apps
+from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core import mail
 from django.core.exceptions import ValidationError
-from django.test import Client, TestCase, override_settings
+from django.db import transaction
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Category, Product
 
+from .admin import OrderAdmin
 from .cart import Cart
 from .models import Order
 
@@ -221,3 +226,130 @@ class ManagerOrderEmailTests(TestCase):
         order.save(update_fields=["status", "updated_at"])
         manager_messages = [message for message in mail.outbox if message.to == ["manager@example.test"]]
         self.assertEqual(len(manager_messages), 1)
+
+
+@override_settings(
+    MAILERS={"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}},
+    DEFAULT_FROM_EMAIL="sender@example.test",
+    MANAGER_EMAIL="manager@example.test",
+)
+class OrderStatusEmailTests(TestCase):
+    def setUp(self):
+        self.order = Order.objects.create(
+            customer_number=7, full_name="Тестовий клієнт", email="customer@example.test",
+            phone="+380000000000",
+        )
+
+    def save_status(self, status):
+        self.order.status = status
+        self.order.save(update_fields=["status", "updated_at"])
+
+    def test_creation_does_not_send_status_email(self):
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_real_changes_send_one_email_each(self):
+        for index, status in enumerate((Order.Status.PROCESSING, Order.Status.CONFIRMED,
+                                        Order.Status.COMPLETED, Order.Status.CANCELLED), 1):
+            with self.subTest(status=status):
+                with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                    self.save_status(status)
+                self.assertEqual(len(callbacks), 1)
+                self.assertEqual(len(mail.outbox), index)
+                message = mail.outbox[-1]
+                self.assertEqual(message.to, ["customer@example.test"])
+                self.assertEqual(message.reply_to, ["manager@example.test"])
+                self.assertIn("№7", message.subject)
+                self.assertIn(status.label, message.body)
+
+    def test_unchanged_status_does_not_send_email(self):
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.order.save()
+            self.save_status(Order.Status.NEW)
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_unsaved_status_is_not_notified(self):
+        self.order.status = Order.Status.PROCESSING
+        self.order.comment = "Оновлено лише коментар"
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.order.save(update_fields=["comment", "updated_at"])
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+        self.assertEqual(callbacks, [])
+
+    def test_email_uses_saved_contact_address(self):
+        self.order.email = "unsaved@example.test"
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save_status(Order.Status.PROCESSING)
+        self.assertEqual(mail.outbox[0].to, ["customer@example.test"])
+
+    def test_rollback_does_not_send_email(self):
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            try:
+                with transaction.atomic():
+                    self.save_status(Order.Status.CONFIRMED)
+                    raise ValueError("QA rollback")
+            except ValueError:
+                pass
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_admin_single_save_sends_one_email(self):
+        request = RequestFactory().post("/admin/orders/order/")
+        self.order.status = Order.Status.CONFIRMED
+        with self.captureOnCommitCallbacks(execute=True):
+            OrderAdmin(Order, admin.site).save_model(request, self.order, form=None, change=True)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_admin_bulk_action_sends_once_per_changed_order(self):
+        other = Order.objects.create(
+            customer_number=8, full_name="Інший клієнт", email="other@example.test",
+            phone="+380000000000",
+        )
+        request = RequestFactory().post("/admin/orders/order/")
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        queryset = Order.objects.filter(pk__in=[self.order.pk, other.pk])
+        model_admin = OrderAdmin(Order, admin.site)
+        with self.captureOnCommitCallbacks(execute=True):
+            model_admin.mark_confirmed(request, queryset)
+            model_admin.mark_confirmed(request, queryset)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual({message.to[0] for message in mail.outbox},
+                         {"customer@example.test", "other@example.test"})
+
+    def test_repeated_ready_does_not_duplicate_receivers(self):
+        config = apps.get_app_config("orders")
+        config.ready()
+        config.ready()
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save_status(Order.Status.PROCESSING)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_mail_failure_keeps_status_change(self):
+        with patch("orders.apps.EmailMessage.send", side_effect=OSError("QA mail unavailable")):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    self.save_status(Order.Status.CONFIRMED)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CONFIRMED)
+
+    def test_deferred_emails_keep_each_status_snapshot(self):
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            self.save_status(Order.Status.PROCESSING)
+            self.save_status(Order.Status.CONFIRMED)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(callbacks), 2)
+        for callback in callbacks:
+            callback()
+        self.assertIn("В обробці", mail.outbox[0].subject)
+        self.assertIn("Погоджена", mail.outbox[1].subject)
+
+    def test_raw_fixture_save_does_not_send_email(self):
+        self.order.status = Order.Status.PROCESSING
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.order.save_base(raw=True, update_fields=["status"])
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
