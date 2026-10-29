@@ -91,6 +91,23 @@
                 погоджуються з менеджером.
             </p>
 
+            {% if order.status == 'new' %}
+                <form
+                    class="order-cancel-form"
+                    method="post"
+                    action="{% url 'order_cancel' order.pk %}"
+                >
+                    {% csrf_token %}
+                    <p>
+                        Ви можете самостійно скасувати заявку,
+                        поки вона має статус «Нова».
+                    </p>
+                    <button class="button order-cancel-button" type="submit">
+                        Скасувати заявку
+                    </button>
+                </form>
+            {% endif %}
+
             <p>
                 <a class="text-link" href="{% url 'account' %}">
                     До особистого кабінету

@@ -353,3 +353,129 @@ class OrderStatusEmailTests(TestCase):
             self.order.save_base(raw=True, update_fields=["status"])
         self.assertEqual(callbacks, [])
         self.assertEqual(len(mail.outbox), 0)
+
+
+@override_settings(
+    MAILERS={"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}},
+    DEFAULT_FROM_EMAIL="sender@example.test",
+    MANAGER_EMAIL="manager@example.test",
+)
+class OrderCancellationTests(TestCase):
+    def setUp(self):
+        self.owner = get_user_model().objects.create_user(username="cancel-owner", email="owner@example.test")
+        self.other = get_user_model().objects.create_user(username="cancel-other", email="other@example.test")
+        self.order = Order.objects.create(
+            user=self.owner, customer_number=3, full_name="Тестовий клієнт",
+            email="owner@example.test", phone="+380000000000",
+        )
+        self.url = reverse("order_cancel", args=[self.order.pk])
+        self.detail_url = reverse("order_detail", args=[self.order.pk])
+        self.client.force_login(self.owner)
+
+    def test_owner_can_cancel_new_order_and_receives_one_email(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(self.url)
+        self.assertRedirects(response, self.detail_url, fetch_redirect_response=False)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)
+        self.assertEqual(self.order.customer_number, 3)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["owner@example.test"])
+        self.assertIn("Скасована", mail.outbox[0].body)
+        self.assertContains(self.client.get(self.detail_url), "Заявку №3 скасовано.")
+
+    def test_get_does_not_cancel_order(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+
+    def test_anonymous_request_redirects_to_login(self):
+        self.client.logout()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("login")))
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+
+    def test_another_user_gets_404(self):
+        self.client.force_login(self.other)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 404)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+        self.assertEqual(callbacks, [])
+
+    def test_non_new_statuses_are_not_cancelled(self):
+        for status in (Order.Status.PROCESSING, Order.Status.CONFIRMED,
+                       Order.Status.COMPLETED, Order.Status.CANCELLED):
+            with self.subTest(status=status):
+                Order.objects.filter(pk=self.order.pk).update(status=status)
+                with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                    response = self.client.post(self.url)
+                self.assertRedirects(response, self.detail_url)
+                self.order.refresh_from_db()
+                self.assertEqual(self.order.status, status)
+                self.assertEqual(callbacks, [])
+
+    def test_repeated_post_does_not_repeat_status_email(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(self.url)
+            self.client.post(self.url)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_button_is_shown_only_for_new_order(self):
+        action = f'action="{self.url}"'
+        self.assertContains(self.client.get(self.detail_url), action)
+        for status in (Order.Status.PROCESSING, Order.Status.CONFIRMED,
+                       Order.Status.COMPLETED, Order.Status.CANCELLED):
+            Order.objects.filter(pk=self.order.pk).update(status=status)
+            self.assertNotContains(self.client.get(self.detail_url), action)
+
+    def test_missing_csrf_is_rejected(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.owner)
+        self.assertEqual(client.post(self.url).status_code, 403)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+
+    def test_valid_csrf_allows_cancellation(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.owner)
+        client.get(self.detail_url)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = client.post(self.url, HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value)
+        self.assertRedirects(response, self.detail_url)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)
+
+    def test_foreign_order_detail_is_also_404(self):
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(self.detail_url).status_code, 404)
+
+    def test_cancellation_keeps_order_items(self):
+        item = self.order.items.create(product_name="Збережена назва", quantity="2", unit="pcs")
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(self.url)
+        item.refresh_from_db()
+        self.assertEqual(item.product_name, "Збережена назва")
+        self.assertEqual(item.quantity, Decimal("2"))
+        self.assertEqual(item.order_id, self.order.pk)
+
+    def test_stale_page_cannot_cancel_processing_order(self):
+        self.assertContains(self.client.get(self.detail_url), f'action="{self.url}"')
+        Order.objects.filter(pk=self.order.pk).update(status=Order.Status.PROCESSING)
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            self.client.post(self.url)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PROCESSING)
+        self.assertEqual(callbacks, [])
+
+    def test_mail_failure_does_not_prevent_cancellation(self):
+        with patch("orders.apps.EmailMessage.send", side_effect=OSError("QA mail unavailable")):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.client.post(self.url)
+        self.assertRedirects(response, self.detail_url)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)

@@ -242,6 +242,28 @@ def order_detail(request, pk):
         {"order": order},
     )
 
+@login_required
+@require_POST
+def order_cancel(request, pk):
+    with transaction.atomic():
+        order = get_object_or_404(
+            Order.objects.select_for_update(),
+            pk=pk,
+            user=request.user,
+        )
+        if order.status != Order.Status.NEW:
+            messages.error(
+                request,
+                "Скасувати можна лише заявку зі статусом «Нова».",
+            )
+        else:
+            order.status = Order.Status.CANCELLED
+            order.save(update_fields=["status", "updated_at"])
+            messages.success(request, f"Заявку №{order.customer_number} скасовано.")
+
+    return redirect("order_detail", pk=order.pk)
+
+
 # =========================
 # ПОВТОРЕННЯ ПОПЕРЕДНЬОЇ ЗАЯВКИ
 # =========================
