@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="{% static 'css/style.css' %}?v=30.1"
+        href="{% static 'css/style.css' %}?v=31"
     >
 </head>
 
@@ -108,7 +108,7 @@
                     class="site-message {{ message.tags }}"
                     role="status"
                 >
-                    <span class="site-message-icon">
+                    <span class="site-message-icon" aria-hidden="true">
                         {% if 'success' in message.tags %}
                             ✓
                         {% elif 'error' in message.tags %}
@@ -227,7 +227,7 @@
 
 <!-- ОСНОВНИЙ JAVASCRIPT -->
 <script
-    src="{% static 'js/main.js' %}?v=30.1"
+    src="{% static 'js/main.js' %}?v=31"
     defer
 ></script>
 
