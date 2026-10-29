@@ -2496,3 +2496,81 @@ p {
 .hero-title .hero-word {
     display: inline-block;
 }
+
+/* Декоративний рядок категорій на головній */
+
+.category-marquee {
+    padding-block: 16px;
+    color: var(--cream);
+    background: var(--burgundy);
+}
+
+.category-marquee:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: -3px;
+}
+
+.category-marquee-inner {
+    width: 100%;
+}
+
+.category-marquee-viewport {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.category-marquee-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 28px;
+    padding-inline: 20px;
+}
+
+.category-marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.category-marquee-item::before {
+    content: "✦";
+    color: var(--gold);
+}
+
+.category-marquee-copy {
+    display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .js-enabled .category-marquee-track {
+        display: flex;
+        width: max-content;
+        animation: category-marquee-scroll 28s linear infinite;
+    }
+
+    .js-enabled .category-marquee-group {
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+        padding-left: 0;
+        padding-right: 28px;
+    }
+
+    .js-enabled .category-marquee-copy {
+        display: flex;
+    }
+
+    .category-marquee:hover .category-marquee-track,
+    .category-marquee:focus-within .category-marquee-track {
+        animation-play-state: paused;
+    }
+}
+
+@keyframes category-marquee-scroll {
+    to {
+        transform: translateX(-50%);
+    }
+}

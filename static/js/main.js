@@ -181,3 +181,46 @@ if (document.querySelector(".hero") && window.gsap && window.ScrollTrigger) {
         }
     );
 }
+
+// Безперервний рядок: однакові групи без розтягування проміжків.
+document.querySelectorAll("[data-category-marquee]").forEach((marquee) => {
+    const viewport = marquee.querySelector(".category-marquee-viewport");
+    const group = marquee.querySelector(".category-marquee-group");
+    const copy = marquee.querySelector(".category-marquee-copy");
+    if (!viewport || !group || !copy || !group.children.length) {
+        return;
+    }
+
+    const originalItems = Array.from(group.children, (item) => item.cloneNode(true));
+    const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    let resizeFrame = 0;
+
+    const updateMarquee = () => {
+        group.replaceChildren(...originalItems.map((item) => item.cloneNode(true)));
+        copy.replaceChildren(...originalItems.map((item) => item.cloneNode(true)));
+        if (!motion.matches || !document.documentElement.classList.contains("js-enabled") || !viewport.clientWidth) {
+            return;
+        }
+
+        while (group.getBoundingClientRect().width < viewport.clientWidth) {
+            group.append(...originalItems.map((item) => item.cloneNode(true)));
+        }
+        copy.replaceChildren(...Array.from(group.children, (item) => item.cloneNode(true)));
+    };
+
+    const scheduleUpdate = () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(updateMarquee);
+    };
+
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    motion.addEventListener("change", scheduleUpdate);
+    new MutationObserver(scheduleUpdate).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"]
+    });
+    if (document.fonts) {
+        document.fonts.ready.then(scheduleUpdate);
+    }
+    updateMarquee();
+});
