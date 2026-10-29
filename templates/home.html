@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static catalog_images %}
 
 {% block title %}Головна | Роздільнянський ковбасний цех{% endblock %}
 
@@ -143,6 +143,59 @@
         </div>
     </div>
 </section>
+
+{% if featured_products %}
+<section class="section" id="featured-products" aria-labelledby="featured-products-title">
+    <div class="container">
+        <h2 id="featured-products-title">Наша добірка</h2>
+
+        <p>
+            Познайомтеся з частиною нашого асортименту.
+            Наявність і строки виготовлення уточнюйте у менеджера.
+        </p>
+
+        <div class="catalog-products catalog-products-framed">
+            {% for product in featured_products %}
+                <article class="product-card">
+                    <a
+                        class="product-card-link"
+                        href="{% url 'product_detail' product.pk %}"
+                    >
+                        <div class="product-card-image">
+                            {% if product.image %}
+                                {% catalog_thumbnail product.image as thumbnail %}
+                                <img
+                                    src="{{ thumbnail.src }}"
+                                    srcset="{{ thumbnail.srcset }}"
+                                    sizes="{{ thumbnail.sizes }}"
+                                    alt="{{ product.name }}"
+                                    width="400"
+                                    height="500"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            {% else %}
+                                <div class="product-card-placeholder">
+                                    Фото незабаром
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="product-card-content">
+                            <p class="product-card-category">{{ product.category.name }}</p>
+                            <h3 class="product-card-title">{{ product.name }}</h3>
+                        </div>
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+
+        <p>
+            <a class="button" href="{% url 'catalog' %}">Увесь каталог</a>
+        </p>
+    </div>
+</section>
+{% endif %}
 
 <section class="section order-guide" aria-labelledby="order-guide-title">
     <div class="container">
