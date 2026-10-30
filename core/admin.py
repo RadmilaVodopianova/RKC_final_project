@@ -1,21 +1,22 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from .models import Category, ContactMessage, Product
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ModelAdmin):
     list_display = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ModelAdmin):
     list_display = ("name", "category", "is_active")
     list_filter = ("category", "is_active")
     search_fields = ("name",)
 
 @admin.register(ContactMessage)
-class ContactMessageAdmin(admin.ModelAdmin):
+class ContactMessageAdmin(ModelAdmin):
     list_display = (
         "id",
         "name",
