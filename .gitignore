@@ -8,3 +8,4 @@ __pycache__/
 !.env.example
 db.sqlite3
 media/catalog_thumbnails/
+staticfiles/
