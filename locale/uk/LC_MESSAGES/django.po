@@ -1,0 +1,427 @@
+# Український переклад додаткових написів Django Unfold.
+
+msgid ""
+msgstr "Project-Id-Version: RKC\nLanguage: uk\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+msgid "Add new item"
+msgstr "Додати елемент"
+
+msgid "Add row"
+msgstr "Додати рядок"
+
+msgid "After you've created a user, you’ll be able to edit more user options."
+msgstr "Після створення користувача ви зможете змінити додаткові параметри."
+
+msgid "All applications"
+msgstr "Усі застосунки"
+
+msgid "Apply Filters"
+msgstr "Застосувати фільтри"
+
+msgid "Available shortcuts"
+msgstr "Доступні сполучення клавіш"
+
+msgid "Below is a preview of data to be imported. If you are satisfied with the results, click 'Confirm import'"
+msgstr "Нижче наведено попередній перегляд даних для імпорту. Якщо все правильно, натисніть «Підтвердити імпорт»."
+
+msgid "Bold"
+msgstr "Жирний"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Change History"
+msgstr "Історія змін"
+
+msgid "Change reason"
+msgstr "Причина зміни"
+
+msgid "Changed by"
+msgstr "Хто змінив"
+
+msgid "Changelist shortcuts"
+msgstr "Сполучення клавіш списку"
+
+msgid "Changes"
+msgstr "Зміни"
+
+msgid "Choose a date from the list below to recover a deleted version of an object."
+msgstr "Виберіть дату зі списку нижче, щоб відновити видалену версію об’єкта."
+
+msgid "Choose a date from the list below to revert to a previous version of this object"
+msgstr "Виберіть дату зі списку нижче, щоб відновити попередню версію цього об’єкта"
+
+msgid "Choose a date from the list below to revert to a previous version of this object."
+msgstr "Виберіть дату зі списку нижче, щоб відновити попередню версію цього об’єкта."
+
+msgid "Choose file to upload"
+msgstr "Виберіть файл для завантаження"
+
+msgid "Click to cancel"
+msgstr "Натисніть, щоб скасувати"
+
+msgid "Click to download"
+msgstr "Натисніть, щоб завантажити"
+
+msgid "Code"
+msgstr "Код"
+
+msgid "Collapse"
+msgstr "Згорнути"
+
+msgid "Command tool shortcuts"
+msgstr "Сполучення клавіш панелі команд"
+
+msgid "Comment"
+msgstr "Коментар"
+
+msgid "Confirm import"
+msgstr "Підтвердити імпорт"
+
+msgid "Create new record"
+msgstr "Створити запис"
+
+msgid "Current file"
+msgstr "Поточний файл"
+
+msgid "Dark"
+msgstr "Темна"
+
+msgid "Dataset not found. No action performed."
+msgstr "Набір даних не знайдено. Дію не виконано."
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Date from"
+msgstr "Дата від"
+
+msgid "Date to"
+msgstr "Дата до"
+
+msgid "Default"
+msgstr "За замовчуванням"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Edit comment:"
+msgstr "Редагувати коментар:"
+
+msgid "Enter an URL"
+msgstr "Введіть URL-адресу"
+
+msgid "Export"
+msgstr "Експорт"
+
+msgid "False"
+msgstr "Ні"
+
+msgid "Field"
+msgstr "Поле"
+
+msgid "Field <strong class=\"font-semibold\">{field_name}</strong> is not an autocomplete field. Please add it to the `autocomplete_fields` list."
+msgstr "Поле <strong class=\"font-semibold\">{field_name}</strong> не підтримує автодоповнення. Додайте його до списку `autocomplete_fields`."
+
+msgid "Filters"
+msgstr "Фільтри"
+
+msgid "Forgotten your password or username?"
+msgstr "Забули пароль або ім’я користувача?"
+
+msgid "From"
+msgstr "Від"
+
+msgid "General"
+msgstr "Загальне"
+
+msgid "Global shortcuts"
+msgstr "Загальні сполучення клавіш"
+
+msgid "Go back"
+msgstr "Повернутися"
+
+msgid "Go back to history list"
+msgstr "Повернутися до історії"
+
+msgid "Group"
+msgstr "Група"
+
+msgid "Group permissions"
+msgstr "Права групи"
+
+msgid "Heading"
+msgstr "Заголовок"
+
+msgid "Image preview"
+msgstr "Перегляд зображення"
+
+msgid "Import"
+msgstr "Імпорт"
+
+msgid "Indent decrease"
+msgstr "Зменшити відступ"
+
+msgid "Indent increase"
+msgstr "Збільшити відступ"
+
+msgid "Italic"
+msgstr "Курсив"
+
+msgid "Light"
+msgstr "Світла"
+
+msgid "Line number"
+msgstr "Номер рядка"
+
+msgid "Link"
+msgstr "Посилання"
+
+msgid "Manage group"
+msgstr "Керування групою"
+
+msgid "Manage user"
+msgstr "Керування користувачем"
+
+msgid "Name"
+msgstr "Назва"
+
+msgid "Navigate"
+msgstr "Перейти"
+
+msgid "New"
+msgstr "Новий"
+
+msgid "New value"
+msgstr "Нове значення"
+
+msgid "Next"
+msgstr "Далі"
+
+msgid "No data"
+msgstr "Немає даних"
+
+msgid "No results found"
+msgstr "Результатів не знайдено"
+
+msgid "Non field specific"
+msgstr "Загальні помилки"
+
+msgid "Not enough data."
+msgstr "Недостатньо даних."
+
+msgid "Nothing matched your search"
+msgstr "За вашим запитом нічого не знайдено"
+
+msgid "Object"
+msgstr "Об’єкт"
+
+msgid "Object permissions"
+msgstr "Права на об’єкт"
+
+msgid "Old value"
+msgstr "Попереднє значення"
+
+msgid "Open command tool"
+msgstr "Відкрити панель команд"
+
+msgid "Open selection"
+msgstr "Відкрити вибране"
+
+msgid "Open selection in new tab"
+msgstr "Відкрити вибране в новій вкладці"
+
+msgid "Open shortcuts list"
+msgstr "Відкрити список сполучень клавіш"
+
+msgid "Ordered list"
+msgstr "Нумерований список"
+
+msgid "Paragraph"
+msgstr "Абзац"
+
+msgid "Please correct these errors in your data where possible, then reupload it using the form above."
+msgstr "Виправте помилки в даних і завантажте файл повторно за допомогою форми вище."
+
+msgid "Press the save button below to recover this version of the object."
+msgstr "Натисніть кнопку збереження нижче, щоб відновити цю версію об’єкта."
+
+msgid "Press the save button below to revert to this version of the object."
+msgstr "Натисніть кнопку збереження нижче, щоб повернутися до цієї версії об’єкта."
+
+msgid "Previous"
+msgstr "Назад"
+
+msgid "Quote"
+msgstr "Цитата"
+
+msgid "Raw passwords are not stored, so there is no way to see this user’s password, but you can change the password using <a href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">this form</a>."
+msgstr "Паролі не зберігаються у відкритому вигляді, тому переглянути пароль користувача неможливо. Змінити його можна за допомогою <a href=\"{}\" class=\"text-primary-600 dark:text-primary-500\">цієї форми</a>."
+
+msgid "Recent searches"
+msgstr "Останні пошукові запити"
+
+msgid "Record picture"
+msgstr "Зображення запису"
+
+msgid "Redo"
+msgstr "Повторити"
+
+msgid "Reset filters"
+msgstr "Скинути фільтри"
+
+msgid "Reset to default"
+msgstr "Відновити початкові значення"
+
+msgid "Return to site"
+msgstr "Повернутися на сайт"
+
+msgid "Revert"
+msgstr "Відновити"
+
+msgid "Revert to this version"
+msgstr "Відновити цю версію"
+
+msgid "Row"
+msgstr "Рядок"
+
+msgid "Run"
+msgstr "Виконати"
+
+msgid "Search apps and models..."
+msgstr "Пошук застосунків і моделей..."
+
+msgid "Select"
+msgstr "Вибрати"
+
+msgid "Select action"
+msgstr "Виберіть дію"
+
+msgid "Select action to run"
+msgstr "Виберіть дію для виконання"
+
+msgid "Select currency"
+msgstr "Виберіть валюту"
+
+msgid "Select format"
+msgstr "Виберіть формат"
+
+msgid "Select record"
+msgstr "Виберіть запис"
+
+msgid "Select value"
+msgstr "Виберіть значення"
+
+msgid "Skipped"
+msgstr "Пропущено"
+
+msgid "Some rows failed to validate"
+msgstr "Деякі рядки не пройшли перевірку"
+
+msgid "Strike"
+msgstr "Закреслений"
+
+msgid "Submit"
+msgstr "Надіслати"
+
+msgid "System"
+msgstr "Системна"
+
+msgid "There are no deleted objects to recover"
+msgstr "Немає видалених об’єктів для відновлення"
+
+msgid "There are no differences."
+msgstr "Відмінностей немає."
+
+msgid "This exporter will export the following fields"
+msgstr "Буде експортовано такі поля"
+
+msgid "This exporter will export the following fields: "
+msgstr "Буде експортовано такі поля: "
+
+msgid "This importer will import the following fields: "
+msgstr "Буде імпортовано такі поля: "
+
+msgid "This item will be deleted."
+msgstr "Цей елемент буде видалено."
+
+msgid "This object doesn't have a change history."
+msgstr "Цей об’єкт не має історії змін."
+
+msgid "This object doesn't have a change history. It probably wasn't added via this admin site."
+msgstr "Цей об’єкт не має історії змін. Імовірно, його додано поза цією адмінкою."
+
+msgid "This page yielded into no results."
+msgstr "На цій сторінці немає результатів."
+
+msgid "To"
+msgstr "До"
+
+msgid "Toggle dark/light mode"
+msgstr "Перемкнути темну або світлу тему"
+
+msgid "Toggle filter"
+msgstr "Показати або сховати фільтр"
+
+msgid "Toggle password visibility"
+msgstr "Показати або сховати пароль"
+
+msgid "Toggle sidebar"
+msgstr "Показати або сховати бічну панель"
+
+msgid "True"
+msgstr "Так"
+
+msgid "Type to search"
+msgstr "Введіть текст для пошуку"
+
+msgid "Underlined"
+msgstr "Підкреслений"
+
+msgid "Undo"
+msgstr "Скасувати дію"
+
+msgid "Unlink"
+msgstr "Прибрати посилання"
+
+msgid "Unordered list"
+msgstr "Маркований список"
+
+msgid "Update"
+msgstr "Оновити"
+
+msgid "User permissions"
+msgstr "Права користувача"
+
+msgid "Value"
+msgstr "Значення"
+
+msgid "View traceback"
+msgstr "Переглянути подробиці помилки"
+
+msgid "Welcome"
+msgstr "Вітаємо"
+
+msgid "You can not create nested object without parent"
+msgstr "Неможливо створити вкладений об’єкт без батьківського"
+
+msgid "You have been successfully logged out from the administration"
+msgstr "Ви успішно вийшли з адмінки"
+
+msgid "compare"
+msgstr "порівняти"
+
+msgid "hide warning"
+msgstr "сховати попередження"
+
+msgid "impersonate"
+msgstr "увійти від імені користувача"
+
+msgid "next"
+msgstr "далі"
+
+msgid "previous"
+msgstr "назад"
+
+msgid "stop impersonating"
+msgstr "завершити вхід від імені користувача"

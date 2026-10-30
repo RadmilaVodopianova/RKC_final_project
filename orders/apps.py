@@ -7,6 +7,7 @@ from django.db.models.signals import post_save, pre_save
 
 class OrdersConfig(AppConfig):
     name = 'orders'
+    verbose_name = "Заявки"
 
     def ready(self):
         order_model = self.get_model("Order")

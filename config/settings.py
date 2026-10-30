@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -112,6 +116,8 @@ TIME_ZONE = "Europe/Kyiv"
 
 USE_I18N = True
 
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
 USE_TZ = True
 
 
@@ -149,3 +155,42 @@ LOGOUT_REDIRECT_URL = "/"
 AUTHENTICATION_BACKENDS = [
     "accounts.backends.EmailBackend",
 ]
+
+
+UNFOLD = {
+    "SITE_TITLE": "Адміністрування РКЦ",
+    "SITE_HEADER": "Роздільнянський ковбасний цех",
+    "SITE_SUBHEADER": "Керування сайтом і заявками",
+    "SITE_ICON": lambda request: static("images/logo.png"),
+    "SITE_URL": reverse_lazy("home"),
+    "THEME": "light",
+    "BORDER_RADIUS": "10px",
+    "COLORS": {
+        "primary": {
+            "50": "#fff1f2",
+            "100": "#ffe4e6",
+            "200": "#fecdd3",
+            "300": "#fda4af",
+            "400": "#e76b7b",
+            "500": "#a92335",
+            "600": "#750d16",
+            "700": "#650b13",
+            "800": "#540810",
+            "900": "#44060d",
+            "950": "#2d0408",
+        },
+        "base": {
+            "50": "#fff8ed",
+            "100": "#f5ead8",
+            "200": "#e7d7bf",
+            "300": "#d2bfa3",
+            "400": "#ac9478",
+            "500": "#806a57",
+            "600": "#675344",
+            "700": "#503d32",
+            "800": "#382822",
+            "900": "#2c1e19",
+            "950": "#1c120f",
+        },
+    },
+}

@@ -2,11 +2,12 @@ from django.contrib import admin, messages
 from django.db import transaction
 from django.db.models import Count
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin, TabularInline
 
 from .models import Order, OrderItem
 
 
-class OrderItemInline(admin.TabularInline):
+class OrderItemInline(TabularInline):
     model = OrderItem
     extra = 0
 
@@ -25,7 +26,7 @@ class OrderItemInline(admin.TabularInline):
 
 
 @admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(ModelAdmin):
     list_display = (
         "id",
         "full_name",
