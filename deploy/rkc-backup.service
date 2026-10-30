@@ -1,0 +1,15 @@
+[Unit]
+Description=Резервна копія бази та фотографій РКЦ
+
+[Service]
+Type=oneshot
+User=rkc
+Group=rkc
+WorkingDirectory=/home/rkc/app
+ExecStart=/home/rkc/app/.venv/bin/python /home/rkc/app/deploy/backup.py --backup-dir /home/rkc/backups --keep 7
+TimeoutStartSec=20min
+UMask=0077
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
