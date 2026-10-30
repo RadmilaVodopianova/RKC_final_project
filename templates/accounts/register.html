@@ -1,16 +1,13 @@
-{% extends "base.html" %}
+{% extends "accounts/access_base.html" %}
 
-{% block title %}Реєстрація | Роздільнянський ковбасний цех{% endblock %}
+{% block title %}Запит на доступ | Роздільнянський ковбасний цех{% endblock %}
 
-{% block content %}
-<section class="section">
-    <div class="container">
-        <div class="auth-card">
-            <h1>Реєстрація</h1>
+{% block access_content %}
+            <h1 id="access-title">Запит на доступ</h1>
 
             <p>
-                Створіть обліковий запис, щоб оформлювати заявки
-                та переглядати їхні статуси.
+                Заповніть форму. Адміністратор перевірить ваш запит
+                і надасть доступ до сайту. До схвалення вхід буде недоступний.
             </p>
 
             <form method="post" class="auth-form">
@@ -37,7 +34,7 @@
                 {% endfor %}
 
                 <button class="button" type="submit">
-                    Зареєструватися
+                    Надіслати запит
                 </button>
             </form>
 
@@ -47,7 +44,4 @@
                     Увійти
                 </a>
             </p>
-        </div>
-    </div>
-</section>
 {% endblock %}

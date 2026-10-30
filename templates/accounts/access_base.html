@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Вхід | Роздільнянський ковбасний цех{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=45">
+</head>
+<body class="access-page">
+    <main class="access-main">
+        <div class="access-brand">
+            <img src="{% static 'images/logo.png' %}" alt="Роздільнянський ковбасний цех" width="64" height="76">
+            <p>Роздільнянський<span>КОВБАСНИЙ ЦЕХ</span></p>
+        </div>
+        <section class="auth-card access-card" aria-labelledby="access-title">
+            {% for message in messages %}
+                <p class="access-message" role="status">{{ message }}</p>
+            {% endfor %}
+            {% block access_content %}{% endblock %}
+        </section>
+        <p class="access-footnote">Доступ до сайту надається після схвалення адміністратором.</p>
+    </main>
+</body>
+</html>

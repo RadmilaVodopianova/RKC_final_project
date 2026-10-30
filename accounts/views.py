@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -21,11 +20,17 @@ def register(request):
 
         if form.is_valid():
             with transaction.atomic():
-                user = form.save()
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
                 Profile.objects.create(user=user)
 
-            login(request, user)
-            return redirect("account")
+            messages.success(
+                request,
+                "Запит на доступ надіслано. Після схвалення адміністратором "
+                "ви зможете увійти зі своєю електронною поштою та паролем.",
+            )
+            return redirect("login")
     else:
         form = RegistrationForm()
 
@@ -83,3 +88,17 @@ def account(request):
             "orders": orders,
         },
     )
+
+@login_required
+def private_media(request, path):
+    from pathlib import Path
+
+    from django.conf import settings
+    from django.http import Http404
+    from django.views.static import serve
+
+    root = Path(settings.MEDIA_ROOT).resolve()
+    candidate = (root / path).resolve()
+    if not candidate.is_relative_to(root) or not candidate.is_file():
+        raise Http404
+    return serve(request, path, document_root=root, show_indexes=False)
