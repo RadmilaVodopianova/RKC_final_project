@@ -35,6 +35,16 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
+# Увімкніть лише за довіреним HTTPS-проксі, який перезаписує X-Forwarded-Proto.
+HTTPS_ENABLED = env.bool("HTTPS_ENABLED", default=False)
+
+if HTTPS_ENABLED:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+
 
 # Application definition
 
