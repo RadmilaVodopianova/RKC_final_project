@@ -4,3 +4,5 @@ pillow==13.0.0
 sqlparse==0.6.0
 tzdata==2026.5
 django-unfold==0.110.0
+django-environ==0.14.0
+whitenoise==6.12.0
