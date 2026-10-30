@@ -1,0 +1,10 @@
+[Unit]
+Description=Щоденне резервне копіювання РКЦ
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Kyiv
+Persistent=true
+Unit=rkc-backup.service
+
+[Install]
+WantedBy=timers.target
