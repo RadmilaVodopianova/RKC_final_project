@@ -115,8 +115,7 @@ if (document.querySelector(".hero") && window.gsap && window.ScrollTrigger) {
             });
         }
 
-        const gridSelector = ".benefits-grid, .category-grid, " +
-            "#featured-products .catalog-products, .order-guide-steps";
+        const gridSelector = ".benefits-grid, .category-grid, .steps-grid, .order-guide-steps";
 
         const reveal = (element, staggerChildren = false) => {
             if (revealedElements.has(element)) {
@@ -465,3 +464,122 @@ if (window.fetch && window.FormData) {
         });
     });
 }
+
+
+// Добірка: керування кнопками, клавіатурою та звичайним свайпом.
+document.querySelectorAll(".selection-track").forEach((track) => {
+    const section = track.closest("section");
+    const controls = section.querySelector("[data-selection-controls]");
+    const position = section.querySelector(".selection-position");
+    const cards = Array.from(track.children);
+    if (!controls || !cards.length) return;
+    const previous = controls.querySelector('[data-selection-direction="-1"]');
+    const next = controls.querySelector('[data-selection-direction="1"]');
+    let updateFrame = 0;
+    const update = () => {
+        const maximum = Math.max(0, track.scrollWidth - track.clientWidth);
+        controls.hidden = maximum < 2;
+        previous.disabled = track.scrollLeft <= 8;
+        next.disabled = track.scrollLeft >= maximum - 2;
+        const bounds = track.getBoundingClientRect();
+        const visible = cards.map((card, index) => ({ bounds: card.getBoundingClientRect(), index }))
+            .filter((card) => card.bounds.right > bounds.left + 12 && card.bounds.left < bounds.right - 12);
+        if (visible.length) position.textContent = `Показано товари ${visible[0].index + 1}–${visible[visible.length - 1].index + 1} із ${cards.length}`;
+    };
+    const schedule = () => { cancelAnimationFrame(updateFrame); updateFrame = requestAnimationFrame(update); };
+    const move = (direction) => {
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        const cardWidth = cards[0].getBoundingClientRect().width + gap;
+        const pageSize = Math.max(1, Math.floor((track.clientWidth + gap) / cardWidth));
+        const target = Math.max(0, Math.min(track.scrollWidth - track.clientWidth, track.scrollLeft + direction * pageSize * cardWidth));
+        track.scrollTo({ left: target, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    };
+    previous.addEventListener("click", () => move(-1));
+    next.addEventListener("click", () => move(1));
+    track.addEventListener("scroll", schedule, { passive: true });
+    track.addEventListener("keydown", (event) => {
+        if (event.target !== track) return;
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1);
+        } else if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            track.scrollTo({ left: event.key === "Home" ? 0 : track.scrollWidth, behavior: "instant" });
+        }
+    });
+    if (window.ResizeObserver) new ResizeObserver(schedule).observe(track);
+    window.addEventListener("resize", schedule, { passive: true });
+    if (document.fonts) document.fonts.ready.then(schedule);
+    update();
+});
+
+// Лічильники запускаються один раз; доступний текст завжди містить кінцеве число.
+(() => {
+    document.documentElement.classList.add("js-enabled");
+    const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    const counters = Array.from(document.querySelectorAll("[data-count]"));
+    const running = new Map();
+    let observer;
+    const finish = () => {
+        observer?.disconnect();
+        running.forEach((state, element) => {
+            cancelAnimationFrame(state.frame);
+            state.value.textContent = element.dataset.count;
+        });
+        running.clear();
+    };
+    const animateCounter = (element) => {
+        const target = Number(element.dataset.count);
+        if (!Number.isFinite(target) || target < 0) return;
+        const accessible = document.createElement("span");
+        accessible.className = "visually-hidden";
+        accessible.textContent = String(target);
+        const value = document.createElement("span");
+        value.setAttribute("aria-hidden", "true");
+        value.textContent = "0";
+        element.replaceChildren(accessible, value);
+        const state = { frame: 0, value };
+        running.set(element, state);
+        let started;
+        const tick = (time) => {
+            if (started === undefined) started = time;
+            const progress = Math.min(1, (time - started) / 1600);
+            value.textContent = String(Math.round(target * (1 - Math.pow(1 - progress, 3))));
+            if (progress < 1 && !motion.matches) state.frame = requestAnimationFrame(tick);
+            else { value.textContent = String(target); running.delete(element); }
+        };
+        state.frame = requestAnimationFrame(tick);
+    };
+    if (!motion.matches && window.IntersectionObserver) {
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) { observer.unobserve(entry.target); animateCounter(entry.target); }
+            });
+        }, { threshold: 0.4 });
+        counters.forEach((element) => observer.observe(element));
+    }
+    motion.addEventListener("change", () => { if (motion.matches) finish(); });
+
+    // Пройдені відрізки шкали заявки заповнюються послідовно.
+    if (!motion.matches && Element.prototype.animate) {
+        document.querySelectorAll(".order-progress").forEach((progress) => {
+            const animations = [];
+            progress.classList.add("motion-ready");
+            progress.querySelectorAll(".is-reached, .is-current").forEach((step, index) => {
+                const fill = document.createElement("span");
+                fill.className = "order-step-fill";
+                fill.setAttribute("aria-hidden", "true");
+                step.append(fill);
+                animations.push(fill.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], {
+                    duration: 450, delay: index * 140, easing: "ease-out", fill: "backwards"
+                }));
+            });
+            motion.addEventListener("change", () => {
+                if (motion.matches) {
+                    animations.forEach((animation) => animation.cancel());
+                    progress.classList.remove("motion-ready");
+                    progress.querySelectorAll(".order-step-fill").forEach((fill) => fill.remove());
+                }
+            });
+        });
+    }
+})();
