@@ -14,6 +14,7 @@ from pathlib import Path
 
 import environ
 
+from django.core.exceptions import ImproperlyConfigured
 from django.templatetags.static import static
 from django.urls import reverse_lazy
 
@@ -163,14 +164,38 @@ STORAGES = {
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+MAIL_BACKEND = env(
+    "MAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
 
-DEFAULT_FROM_EMAIL = "Роздільнянський ковбасний цех <rkcvk.rozdilna@gmail.com>"
-MANAGER_EMAIL = "rkcvk.rozdilna@gmail.com"
+MAILERS = {"default": {"BACKEND": MAIL_BACKEND}}
+
+if MAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
+    _smtp_options = {
+        "host": env("SMTP_HOST"),
+        "port": env.int("SMTP_PORT", default=587),
+        "username": env("SMTP_USERNAME"),
+        "password": env("SMTP_PASSWORD"),
+        "use_tls": env.bool("SMTP_USE_TLS", default=True),
+        "use_ssl": env.bool("SMTP_USE_SSL", default=False),
+        "timeout": env.int("SMTP_TIMEOUT", default=15),
+    }
+    if not all(_smtp_options[key].strip() for key in ("host", "username", "password")):
+        raise ImproperlyConfigured(
+            "Для SMTP заповніть SMTP_HOST, SMTP_USERNAME та SMTP_PASSWORD."
+        )
+    if _smtp_options["use_tls"] and _smtp_options["use_ssl"]:
+        raise ImproperlyConfigured("SMTP_USE_TLS і SMTP_USE_SSL не можна вмикати одночасно.")
+    if not 1 <= _smtp_options["port"] <= 65535 or _smtp_options["timeout"] < 1:
+        raise ImproperlyConfigured("Перевірте SMTP_PORT і додатне значення SMTP_TIMEOUT.")
+    MAILERS["default"]["OPTIONS"] = _smtp_options
+
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default="Роздільнянський ковбасний цех <rkcvk.rozdilna@gmail.com>",
+)
+MANAGER_EMAIL = env("MANAGER_EMAIL", default="rkcvk.rozdilna@gmail.com")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
