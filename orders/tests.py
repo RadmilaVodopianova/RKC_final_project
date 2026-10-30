@@ -142,13 +142,13 @@ class ManagerOrderEmailTests(TestCase):
     def create_order(self):
         return self.client.post(reverse("order_create"), self.payload)
 
-    def test_sends_one_complete_email_after_commit(self):
+    def test_sends_one_complete_email_per_recipient_after_commit(self):
         with self.captureOnCommitCallbacks(execute=True) as callbacks:
             response = self.create_order()
         order = Order.objects.get(user=self.user)
         self.assertRedirects(response, reverse("order_detail", args=[order.pk]))
-        self.assertEqual(len(callbacks), 1)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(callbacks), 2)
+        self.assertEqual(len(mail.outbox), 2)
         message = mail.outbox[0]
         self.assertEqual(message.to, ["manager@example.test"])
         self.assertEqual(message.from_email, "sender@example.test")
@@ -164,9 +164,10 @@ class ManagerOrderEmailTests(TestCase):
         with self.captureOnCommitCallbacks(execute=False) as callbacks:
             self.create_order()
             self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(len(callbacks), 1)
-        callbacks[0]()
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(callbacks), 2)
+        for callback in callbacks:
+            callback()
+        self.assertEqual(len(mail.outbox), 2)
 
     def test_invalid_order_does_not_send_email(self):
         self.payload["phone"] = "wrong"
@@ -191,15 +192,16 @@ class ManagerOrderEmailTests(TestCase):
             self.create_order()
             self.create_order()
         self.assertEqual(Order.objects.count(), 1)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
 
     def test_email_uses_saved_product_names(self):
         with self.captureOnCommitCallbacks(execute=True):
             self.create_order()
             self.product.name = "Нова назва товару"
             self.product.save(update_fields=["name"])
-        self.assertIn("Ковбаса тестова", mail.outbox[0].body)
-        self.assertNotIn("Нова назва товару", mail.outbox[0].body)
+        for message in mail.outbox:
+            self.assertIn("Ковбаса тестова", message.body)
+            self.assertNotIn("Нова назва товару", message.body)
 
     def test_mail_failure_does_not_lose_order(self):
         with patch("orders.views.EmailMessage.send", side_effect=OSError("QA mail unavailable")):
@@ -230,6 +232,110 @@ class ManagerOrderEmailTests(TestCase):
         order.save(update_fields=["status", "updated_at"])
         manager_messages = [message for message in mail.outbox if message.to == ["manager@example.test"]]
         self.assertEqual(len(manager_messages), 1)
+
+    def test_customer_receives_complete_confirmation(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+        order = Order.objects.get(user=self.user)
+        confirmations = [message for message in mail.outbox if message.subject.startswith("Вашу заявку")]
+        self.assertEqual(len(confirmations), 1)
+        message = confirmations[0]
+        self.assertEqual(message.to, ["customer@example.test"])
+        self.assertEqual(message.from_email, "sender@example.test")
+        self.assertEqual(message.reply_to, ["manager@example.test"])
+        self.assertEqual(message.subject, f"Вашу заявку №{order.customer_number} створено")
+        for text in (
+            "Тестовий клієнт", "Статус під час створення: Нова.",
+            "Ковбаса тестова — 1,25 кг", "Сосиски тестові — 2 шт",
+            "Тестовий коментар", "manager@example.test", "строки виготовлення",
+            "http://testserver" + reverse("order_detail", args=[order.pk]),
+        ):
+            self.assertIn(text, message.body)
+
+    def test_confirmation_uses_email_entered_in_order(self):
+        self.payload["email"] = "contact@example.test"
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+        confirmations = [message for message in mail.outbox if message.subject.startswith("Вашу заявку")]
+        self.assertEqual(len(confirmations), 1)
+        self.assertEqual(confirmations[0].to, ["contact@example.test"])
+
+    def test_confirmation_link_uses_https_for_secure_request(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(reverse("order_create"), self.payload, secure=True)
+        order = Order.objects.get(user=self.user)
+        confirmation = next(message for message in mail.outbox if message.subject.startswith("Вашу заявку"))
+        self.assertIn("https://testserver" + reverse("order_detail", args=[order.pk]), confirmation.body)
+
+    def test_confirmation_keeps_initial_status_snapshot(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+            order = Order.objects.get(user=self.user)
+            order.status = Order.Status.PROCESSING
+            order.save(update_fields=["status", "updated_at"])
+        confirmation = next(message for message in mail.outbox if message.subject.startswith("Вашу заявку"))
+        self.assertIn("Статус під час створення: Нова.", confirmation.body)
+        self.assertNotIn("Статус під час створення: В обробці.", confirmation.body)
+
+    def test_viewing_and_status_change_do_not_repeat_confirmation(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+        order = Order.objects.get(user=self.user)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.get(reverse("order_detail", args=[order.pk]))
+            order.status = Order.Status.PROCESSING
+            order.save(update_fields=["status", "updated_at"])
+        confirmations = [message for message in mail.outbox if message.subject.startswith("Вашу заявку")]
+        updates = [message for message in mail.outbox if message.subject.startswith("Оновлення заявки")]
+        self.assertEqual(len(confirmations), 1)
+        self.assertEqual(len(updates), 1)
+        self.assertEqual(len(mail.outbox), 3)
+
+    def test_manager_failure_does_not_prevent_customer_confirmation(self):
+        original_send = mail.EmailMessage.send
+
+        def send_message(message, *args, **kwargs):
+            if message.to == ["manager@example.test"]:
+                raise OSError("QA manager mailbox unavailable")
+            return original_send(message, *args, **kwargs)
+
+        with patch("orders.views.EmailMessage.send", autospec=True, side_effect=send_message):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.create_order()
+        order = Order.objects.get(user=self.user)
+        self.assertRedirects(response, reverse("order_detail", args=[order.pk]))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["customer@example.test"])
+        self.assertFalse(self.client.session.get(Cart.SESSION_KEY))
+
+    def test_customer_failure_does_not_lose_order_or_manager_email(self):
+        original_send = mail.EmailMessage.send
+
+        def send_message(message, *args, **kwargs):
+            if message.to == ["customer@example.test"]:
+                raise OSError("QA customer mailbox unavailable")
+            return original_send(message, *args, **kwargs)
+
+        with patch("orders.views.EmailMessage.send", autospec=True, side_effect=send_message):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.create_order()
+        order = Order.objects.get(user=self.user)
+        self.assertRedirects(response, reverse("order_detail", args=[order.pk]))
+        self.assertEqual(order.items.count(), 2)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["manager@example.test"])
+        self.assertFalse(self.client.session.get(Cart.SESSION_KEY))
+
+    @override_settings(MANAGER_EMAIL="customer@example.test")
+    def test_same_address_receives_two_different_role_messages(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.create_order()
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertTrue(all(message.to == ["customer@example.test"] for message in mail.outbox))
+        self.assertEqual(len({message.subject for message in mail.outbox}), 2)
+        self.assertEqual(sum(message.subject.startswith("Вашу заявку") for message in mail.outbox), 1)
 
 
 @override_settings(
