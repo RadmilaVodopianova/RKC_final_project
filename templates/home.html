@@ -1,54 +1,19 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static catalog_images %}
-
 {% block title %}Головна | Роздільнянський ковбасний цех{% endblock %}
-
 {% block content %}
+<div class="heritage-home">
 <section class="hero" aria-labelledby="hero-title">
-    <div class="hero-visual" aria-hidden="true">
-        <img
-            class="hero-banner"
-            src="{% static 'images/banner.jpg' %}"
-            alt=""
-            width="2197"
-            height="716"
-            fetchpriority="high"
-        >
-    </div>
-
-    <div class="container hero-inner">
-        <div class="hero-content">
-            <p class="hero-eyebrow">Роздільнянський ковбасний цех</p>
-
-            <h1 id="hero-title" class="hero-title" aria-label="Смак, що об’єднує">
-                <span aria-hidden="true">
-                    <span class="hero-word">Смак,</span>
-                    <span class="hero-word">що</span>
-                </span>
-                <span aria-hidden="true">
-                    <span class="hero-word">об’єднує</span>
-                </span>
-            </h1>
-
-            <p class="hero-description">
-                Ковбасні вироби та м’ясні делікатеси за традиційними
-                рецептурами. Виготовляємо з 2004 року.
-            </p>
-
-            <div class="hero-actions">
-                <a class="button hero-button" href="{% url 'catalog' %}">
-                    Переглянути каталог
-                    <span aria-hidden="true">→</span>
-                </a>
-            </div>
-
-            <p class="hero-note">
-                Асортимент і строки виготовлення узгоджуємо з менеджером.
-            </p>
-        </div>
-    </div>
+    <picture class="hero-art" aria-hidden="true" data-hero-background><source srcset="{% static 'images/heritage-banner.webp' %}" type="image/webp"><img class="hero-banner" src="{% static 'images/heritage-banner.jpg' %}" alt="Ковбасні вироби та м’ясні делікатеси на дерев’яній дошці" width="2197" height="716" fetchpriority="high"></picture>
+    <div class="container hero-inner"><div class="hero-copy">
+        <p class="eyebrow"><span class="gold-line"></span> Від нашого цеху — до вашого столу</p>
+        <h1 id="hero-title" aria-label="Смак, що об’єднує"><span class="hero-word" aria-hidden="true">Смак, що</span> <em class="hero-word" aria-hidden="true">об’єднує</em></h1>
+        <p class="hero-description">Традиційні ковбасні вироби та м’ясні делікатеси. <br>Для родинних сніданків, теплих зустрічей <br class="desktop-break"> і ваших особливих моментів.</p>
+        <a class="button" href="{% url 'catalog' %}">Переглянути каталог {% include 'includes/icon.html' with name='arrow-right' %}</a>
+        <div class="hero-origin">{% include 'includes/icon.html' with name='wheat' %}<span>Виготовляємо у Роздільній<br><strong>Зберігаємо традиції з 2004 року</strong></span></div>
+    </div></div>
+    <div class="hero-seal" aria-hidden="true"><span>ТРАДИЦІЇ СМАКУ</span>{% include 'includes/icon.html' with name='wheat' %}<span>З 2004 РОКУ</span></div>
 </section>
-
 {% if categories %}
 <div class="category-marquee" data-category-marquee tabindex="0" role="region" aria-label="Категорії продукції">
     <div class="container category-marquee-inner">
@@ -69,119 +34,28 @@
     </div>
 </div>
 {% endif %}
-
-<section class="section">
-    <div class="container">
-        <h2>Роздільнянський ковбасний цех</h2>
-
-        <p>
-            Ковбасний цех Роздільнянського виробничого комбінату
-            працює з 2004 року. Ми виготовляємо ковбасні вироби
-            та м’ясні делікатеси за традиційними рецептурами.
-        </p>
-
-        <p>
-            Продукцію можна замовити безпосередньо в цеху,
-            погодивши асортимент і строки виготовлення з менеджером.
-        </p>
-
-        <a class="text-link" href="{% url 'about' %}">Більше про підприємство →</a>
+<section class="section categories-section"><div class="container">
+    <div class="section-heading" data-reveal><div><p class="eyebrow">Наш асортимент</p><h2>Для кожного <em>смаку</em></h2></div><p>Від ніжних варених ковбас<br>до ароматних копченостей.</p><a class="text-link" href="{% url 'catalog' %}">Увесь каталог {% include 'includes/icon.html' with name='arrow-right' %}</a></div>
+    <div class="category-grid heritage-categories" data-stagger>
+    {% for category in categories %}<a class="heritage-category-card" href="{% url 'catalog' %}?category={{ category.slug|urlencode }}">
+        {% with product=category.preview_products.0 %}{% if product.image %}<img src="{{ product.image.url }}" alt="" width="400" height="300" loading="lazy" decoding="async">{% else %}<span class="category-placeholder">{% include 'includes/icon.html' with name='wheat' %}</span>{% endif %}{% endwith %}
+        <span class="heritage-category-caption"><span><strong>{{ category.name }}</strong><small>{{ category.active_count }} у каталозі</small></span><span class="round-arrow">{% include 'includes/icon.html' with name='arrow-right' %}</span></span>
+    </a>{% endfor %}
+    <a class="heritage-category-card category-card-all" href="{% url 'catalog' %}"><span class="category-all-number" data-count="{{ product_count }}">{{ product_count }}</span><span class="category-all-copy">товарів.<br>Ваш улюблений — серед них.</span><span class="heritage-category-caption"><strong>Знайти свій смак</strong><span class="round-arrow">{% include 'includes/icon.html' with name='arrow-right' %}</span></span></a>
     </div>
-</section>
-
-<section class="section benefits-section" aria-labelledby="benefits-title">
-    <div class="container">
-        <h2 id="benefits-title">Чому ми</h2>
-
-        <div class="benefits-grid">
-            <article class="benefit-card">
-                <span class="benefit-number" aria-hidden="true">01</span>
-                <h3>Досвід з 2004 року</h3>
-                <p>
-                    Працюємо в Роздільній та виготовляємо ковбасні вироби
-                    й м’ясні делікатеси з 2004 року.
-                </p>
-            </article>
-
-            <article class="benefit-card">
-                <span class="benefit-number" aria-hidden="true">02</span>
-                <h3>Традиційні рецептури</h3>
-                <p>
-                    Пропонуємо ковбасні вироби та м’ясні делікатеси
-                    за традиційними рецептурами.
-                </p>
-            </article>
-
-            <article class="benefit-card">
-                <span class="benefit-number" aria-hidden="true">03</span>
-                <h3>Прямий зв’язок</h3>
-                <p>
-                    Наявність продукції, строки виготовлення
-                    та умови отримання погоджуємо з менеджером.
-                </p>
-            </article>
-        </div>
-    </div>
-</section>
-
-<section class="section section-catalog">
-    <div class="container">
-        <h2>Наша продукція</h2>
-
-        <p>
-            Каталог представляє асортимент, який може виготовити
-            підприємство. Наявність на конкретну дату, можливість
-            і строки виготовлення уточнюйте у менеджера.
-        </p>
-
-        <div class="category-grid">
-            {% for category in categories %}
-                <a
-                    class="category-card"
-                    href="{% url 'catalog' %}?category={{ category.slug|urlencode }}"
-                >
-                    <span class="category-card-image">
-                        {% with preview=category.preview_products.0 %}
-                            {% if preview %}
-                                <img
-                                    src="{{ preview.image.url }}"
-                                    alt=""
-                                    width="400"
-                                    height="500"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
-                            {% else %}
-                                <span class="category-card-placeholder">
-                                    Фото незабаром
-                                </span>
-                            {% endif %}
-                        {% endwith %}
-                    </span>
-
-                    <span class="category-card-caption">
-                        <span class="category-card-title">{{ category.name }}</span>
-                        <span class="category-card-arrow" aria-hidden="true">↗</span>
-                    </span>
-                </a>
-            {% empty %}
-                <p class="category-empty">Категорії незабаром з’являться.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
+</div></section>
+<section class="why-section"><div class="container why-grid"><div data-reveal><p class="eyebrow">Чому ми</p><h2>Знайомий смак.<br><em>Власне виробництво.</em></h2></div><div class="why-item" data-reveal>{% include 'includes/icon.html' with name='wheat' %}<h3>Традиційні рецептури</h3><p>Ковбасні вироби, які знаходять місце на вашому столі.</p></div><div class="why-item" data-reveal>{% include 'includes/icon.html' with name='shield' %}<h3>Відкритий склад</h3><p>Склад, харчова цінність та умови зберігання в картці товару.</p></div><div class="why-item" data-reveal>{% include 'includes/icon.html' with name='phone' %}<h3>Прямий зв’язок</h3><p>Погоджуйте асортимент і деталі безпосередньо з менеджером.</p></div></div></section>
 {% if featured_products %}
 <section class="section" id="featured-products" aria-labelledby="featured-products-title">
     <div class="container">
-        <h2 id="featured-products-title">Наша добірка</h2>
+        <p class="eyebrow">Знайомство зі смаком</p><h2 id="featured-products-title">Варто <em>скуштувати</em></h2>
 
         <p>
             Познайомтеся з частиною нашого асортименту.
             Наявність і строки виготовлення уточнюйте у менеджера.
         </p>
 
-        <div class="catalog-products catalog-products-framed">
+        <div class="catalog-products catalog-products-framed catalog-quick-add">
             {% for product in featured_products %}
                 <article class="product-card">
                     <a
@@ -213,6 +87,13 @@
                             <h3 class="product-card-title">{{ product.name }}</h3>
                         </div>
                     </a>
+                    <form class="product-card-cart" method="post" action="{% url 'cart_add' product.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <label class="visually-hidden" for="featured-unit-{{ product.pk }}">Одиниця виміру для {{ product.name }}</label>
+                        <select name="unit" id="featured-unit-{{ product.pk }}"><option value="kg">1 кг</option><option value="pcs">1 шт</option></select>
+                        <button class="button" type="submit" aria-label="Додати {{ product.name }} до заявки">У заявку</button>
+                    </form>
                 </article>
             {% endfor %}
         </div>
@@ -224,62 +105,8 @@
 </section>
 {% endif %}
 
-<section class="section order-guide" aria-labelledby="order-guide-title">
-    <div class="container">
-        <h2 id="order-guide-title">Як зробити заявку</h2>
-
-        <ol class="order-guide-steps" role="list">
-            <li class="order-guide-step">
-                <span class="order-guide-number" aria-hidden="true">1</span>
-                <h3>Оберіть продукцію</h3>
-                <p>
-                    Перейдіть до каталогу, відкрийте потрібний товар
-                    і додайте його до кошика.
-                </p>
-            </li>
-
-            <li class="order-guide-step">
-                <span class="order-guide-number" aria-hidden="true">2</span>
-                <h3>Перевірте кошик</h3>
-                <p>
-                    Вкажіть кількість у кг або шт. Перевірте вибрані
-                    позиції перед оформленням заявки.
-                </p>
-            </li>
-
-            <li class="order-guide-step">
-                <span class="order-guide-number" aria-hidden="true">3</span>
-                <h3>Оформіть заявку</h3>
-                <p>
-                    Увійдіть або зареєструйтеся, заповніть контактні
-                    дані та надішліть заявку.
-                </p>
-            </li>
-        </ol>
-
-        <p class="order-guide-note">
-            Наявність, строки виготовлення та вартість
-            погоджуються з менеджером.
-        </p>
-
-        <a class="button" href="{% url 'cart_detail' %}">Перейти до кошика</a>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container">
-        <h2>Зв’яжіться з нами</h2>
-
-        <p>
-            Для уточнення асортименту, строків виготовлення
-            та умов отримання продукції зверніться до менеджера.
-        </p>
-
-        <a class="button" href="tel:+380485361446">
-            Зателефонувати:  +380 48 536 14 46
-        </a>
-
-        <p>Щодня, 09:00–18:00</p>
-    </div>
-</section>
+<section class="section story-section" id="our-production"><div class="container story-grid"><div class="story-image" data-reveal><img src="{% static 'images/production-1.jpg' %}" alt="Виробництво Роздільнянського ковбасного цеху" width="800" height="600" loading="lazy"><div class="story-stamp"><span>З</span><strong>2004</strong><span>РОКУ З ВАМИ</span></div></div><div class="story-copy" data-reveal><p class="eyebrow">За кожним смаком — наша праця</p><h2>Місцеве виробництво.<br><em>Велика справа.</em></h2><p>Ми — ковбасний цех Роздільнянського виробничого комбінату. З 2004 року виготовляємо ковбасні вироби та м’ясні делікатеси за традиційними рецептурами.</p><p>Різні групи продукції та десятки смаків для щоденних і святкових моментів. Допоможемо обрати та погодимо деталі вашої заявки.</p><a class="text-link" href="{% url 'about' %}">Більше про нас {% include 'includes/icon.html' with name='arrow-right' %}</a><div class="story-stats"><div><strong data-count="{{ product_count }}">{{ product_count }}</strong><span>товарів у каталозі</span></div><div><strong data-count="{{ category_count }}">{{ category_count }}</strong><span>категорій продукції</span></div></div></div></div></section>
+<section class="section steps-section"><div class="container"><div class="section-heading" data-reveal><div><p class="eyebrow">Просто та зручно</p><h2>Від вибору <em>до заявки</em></h2></div><p>Кілька кроків — і ми на зв’язку.</p></div><ol class="steps-grid" data-stagger><li><span class="step-number">01</span><h3>Оберіть свій смак</h3><p>Перегляньте каталог, додайте товари до кошика та вкажіть кількість у кг або шт.</p></li><li><span class="step-number">02</span><h3>Залиште заявку</h3><p>Увійдіть до кабінету, перевірте контактні дані та надішліть заявку.</p></li><li><span class="step-number">03</span><h3>Погодьте деталі</h3><p>Менеджер уточнить наявність, вартість, строки виготовлення та отримання.</p></li></ol></div></section>
+<section class="contact-band"><div class="container contact-band-inner" data-reveal><div><p class="eyebrow">Завжди раді вам</p><h2>Поговорімо <em>про смачне</em></h2><p>Допоможемо з асортиментом та умовами замовлення.</p></div><div><a class="contact-big-phone" href="tel:+380485361446">+380 48 536 14 46</a><p>Щодня, 09:00–18:00</p><a class="text-link" href="{% url 'contacts' %}">Усі контакти {% include 'includes/icon.html' with name='arrow-right' %}</a></div></div></section>
+</div>
 {% endblock %}
