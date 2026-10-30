@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from core.models import Product
@@ -149,6 +150,40 @@ def _send_order_created_email(order_id):
     ).send(using="default")
 
 
+def _build_customer_order_created_email(order, order_url):
+    lines = [
+        f"Вітаємо, {order.full_name}!",
+        "",
+        f"Дякуємо! Вашу заявку №{order.customer_number} створено та отримано.",
+        f"Статус під час створення: {order.get_status_display()}.",
+        "Менеджер перевірить наявність продукції та зв’яжеться з вами,",
+        "щоб погодити вартість, строки виготовлення й умови отримання.",
+        "",
+        "Товари у заявці:",
+    ]
+    for item in order.items.all():
+        quantity = format(item.quantity, ".0f" if item.unit == "pcs" else ".2f")
+        quantity = quantity.replace(".", ",")
+        lines.append(f"- {item.product_name} — {quantity} {item.get_unit_display()}")
+    if order.comment:
+        lines.extend(["", "Ваш коментар:", order.comment])
+    lines.extend([
+        "",
+        "Переглянути заявку в особистому кабінеті:",
+        order_url,
+        "",
+        f"Для зв’язку з менеджером: {settings.MANAGER_EMAIL}",
+        "Роздільнянський ковбасний цех",
+    ])
+    return EmailMessage(
+        subject=f"Вашу заявку №{order.customer_number} створено",
+        body="\n".join(lines),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.email],
+        reply_to=[settings.MANAGER_EMAIL],
+    )
+
+
 @login_required
 def order_create(request):
     cart = Cart(request)
@@ -194,8 +229,17 @@ def order_create(request):
                     order_item.full_clean()
                     order_item.save()
 
+                order_url = request.build_absolute_uri(
+                    reverse("order_detail", kwargs={"pk": order.pk})
+                )
+                customer_message = _build_customer_order_created_email(order, order_url)
+
                 transaction.on_commit(
                     lambda order_id=order.pk: _send_order_created_email(order_id),
+                    robust=True,
+                )
+                transaction.on_commit(
+                    lambda message=customer_message: message.send(using="default"),
                     robust=True,
                 )
 
