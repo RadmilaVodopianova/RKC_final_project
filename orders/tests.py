@@ -20,6 +20,8 @@ from .models import Order
 
 class CartAddResponseTests(TestCase):
     def setUp(self):
+        self.user = get_user_model().objects.create_user(username="cart-member", email="cart@example.test")
+        self.client.force_login(self.user)
         category = Category.objects.create(name="Тестова категорія", slug="test-cart")
         self.product = Product.objects.create(category=category, name="Тестовий товар")
         self.url = reverse("cart_add", args=[self.product.pk])
@@ -86,12 +88,14 @@ class CartAddResponseTests(TestCase):
 
     def test_missing_csrf_is_rejected(self):
         client = Client(enforce_csrf_checks=True)
+        client.force_login(self.user)
         response = client.post(self.url, {"quantity": "1", "unit": "kg"},
                                HTTP_ACCEPT="application/json")
         self.assertEqual(response.status_code, 403)
 
     def test_valid_csrf_is_accepted(self):
         client = Client(enforce_csrf_checks=True)
+        client.force_login(self.user)
         client.get(reverse("catalog"))
         response = client.post(self.url, {"quantity": "1", "unit": "kg"},
                                HTTP_ACCEPT="application/json",
