@@ -49,13 +49,18 @@
 <section class="section" id="featured-products" aria-labelledby="featured-products-title">
     <div class="container">
         <p class="eyebrow">Знайомство зі смаком</p><h2 id="featured-products-title">Варто <em>скуштувати</em></h2>
+        <div class="selection-controls" data-selection-controls hidden>
+            <button type="button" class="selection-arrow" data-selection-direction="-1" aria-label="Попередні товари" aria-controls="selection-track">{% include 'includes/icon.html' with name='arrow-left' %}</button>
+            <button type="button" class="selection-arrow" data-selection-direction="1" aria-label="Наступні товари" aria-controls="selection-track">{% include 'includes/icon.html' with name='arrow-right' %}</button>
+        </div>
 
         <p>
             Познайомтеся з частиною нашого асортименту.
             Наявність і строки виготовлення уточнюйте у менеджера.
         </p>
 
-        <div class="catalog-products catalog-products-framed catalog-quick-add">
+        <p class="selection-position visually-hidden" aria-live="polite" aria-atomic="true"></p>
+        <div class="catalog-products catalog-products-framed catalog-quick-add selection-track" id="selection-track" tabindex="0" role="region" aria-label="Наша добірка товарів">
             {% for product in featured_products %}
                 <article class="product-card">
                     <a
