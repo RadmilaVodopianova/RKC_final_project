@@ -17,14 +17,12 @@
                         class="hero-word" aria-hidden="true">об’єднує</em></h1>
                 <p class="hero-description">Традиційні ковбасні вироби та м’ясні делікатеси. <br>Для родинних сніданків,
                     теплих зустрічей <br class="desktop-break"> і ваших особливих моментів.</p>
-                <a class="button" href="{% url 'catalog' %}">Переглянути каталог {% include 'includes/icon.html' with
-                    name='arrow-right' %}</a>
+                <a class="button" href="{% url 'catalog' %}">Переглянути каталог {% include 'includes/icon.html' with name='arrow-right' %}</a>
                 <div class="hero-origin">{% include 'includes/icon.html' with name='wheat' %}<span>Виготовляємо у Роздільній<br><strong>Зберігаємо традиції з 2004 року</strong></span>
                 </div>
             </div>
         </div>
-        <div class="hero-seal" aria-hidden="true"><span>ТРАДИЦІЇ СМАКУ</span>{% include 'includes/icon.html' with
-            name='wheat' %}<span>З 2004 РОКУ</span></div>
+        <div class="hero-seal" aria-hidden="true"><span>ТРАДИЦІЇ СМАКУ</span>{% include 'includes/icon.html' with name='wheat' %}<span>З 2004 РОКУ</span></div>
     </section>
     {% if categories %}
     <div class="category-marquee" data-category-marquee tabindex="0" role="region" aria-label="Категорії продукції">
@@ -60,9 +58,7 @@
                 {% with product=category.preview_products.0 %}{% if product.image %}<img src="{{ product.image.url }}"
                                                                                          alt="" width="400" height="300"
                                                                                          loading="lazy"
-                                                                                         decoding="async">{% else
-                %}<span class="category-placeholder">{% include 'includes/icon.html' with name='wheat' %}</span>{% endif
-                %}{% endwith %}
+                                                                                         decoding="async">{% else %}<span class="category-placeholder">{% include 'includes/icon.html' with name='wheat' %}</span>{% endif %}{% endwith %}
                 <span class="heritage-category-caption"><span><strong>{{ category.name }}</strong><small>{{ category.active_count }} у каталозі</small></span><span
                         class="round-arrow">{% include 'includes/icon.html' with name='arrow-right' %}</span></span>
             </a>{% endfor %}
@@ -95,8 +91,7 @@
             <h2 id="featured-products-title">Варто <em>скуштувати</em></h2>
             <div class="selection-controls" data-selection-controls hidden>
                 <button type="button" class="selection-arrow" data-selection-direction="-1"
-                        aria-label="Попередні товари" aria-controls="selection-track">{% include 'includes/icon.html'
-                    with name='arrow-left' %}
+                        aria-label="Попередні товари" aria-controls="selection-track">{% include 'includes/icon.html' with name='arrow-left' %}
                 </button>
                 <button type="button" class="selection-arrow" data-selection-direction="1" aria-label="Наступні товари"
                         aria-controls="selection-track">{% include 'includes/icon.html' with name='arrow-right' %}
@@ -145,8 +140,7 @@
                     <form class="product-card-cart" method="post" action="{% url 'cart_add' product.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="quantity" value="1">
-                        <label class="visually-hidden" for="featured-unit-{{ product.pk }}">Одиниця виміру для {{
-                            product.name }}</label>
+                        <label class="visually-hidden" for="featured-unit-{{ product.pk }}">Одиниця виміру для {{ product.name }}</label>
                         <select name="unit" id="featured-unit-{{ product.pk }}">
                             <option value="kg">1 кг</option>
                             <option value="pcs">1 шт</option>
@@ -177,11 +171,9 @@
                 <p>Ми — ковбасний цех Роздільнянського виробничого комбінату. З 2004 року виготовляємо ковбасні вироби
                     та м’ясні делікатеси за традиційними рецептурами.</p>
                 <p>Різні групи продукції та десятки смаків для щоденних і святкових моментів. Допоможемо обрати та
-                    погодимо деталі вашої заявки.</p><a class="text-link" href="{% url 'about' %}">Більше про нас {%
-                    include 'includes/icon.html' with name='arrow-right' %}</a>
+                    погодимо деталі вашої заявки.</p><a class="text-link" href="{% url 'about' %}">Більше про нас {% include 'includes/icon.html' with name='arrow-right' %}</a>
                 <div class="story-stats">
-                    <div><strong data-count="{{ product_count }}">{{ product_count
-                        }}</strong><span>товарів у каталозі</span></div>
+                    <div><strong data-count="{{ product_count }}">{{ product_count }}</strong><span>товарів у каталозі</span></div>
                     <div><strong data-count="{{ category_count }}">{{ category_count }}</strong><span>категорій продукції</span>
                     </div>
                 </div>
@@ -213,8 +205,7 @@
                 <h2>Поговоримо <em>про смачне</em></h2>
                 <p>Допоможемо з асортиментом та умовами замовлення.</p></div>
             <div><a class="contact-big-phone" href="tel:+380485361446">+380 48 536 14 46</a>
-                <p>Щодня, 09:00–18:00</p><a class="text-link" href="{% url 'contacts' %}">Усі контакти {% include
-                    'includes/icon.html' with name='arrow-right' %}</a></div>
+                <p>Щодня, 09:00–18:00</p><a class="text-link" href="{% url 'contacts' %}">Усі контакти {% include 'includes/icon.html' with name='arrow-right' %}</a></div>
         </div>
     </section>
 </div>
