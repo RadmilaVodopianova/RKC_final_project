@@ -42,7 +42,7 @@ def _queue_order_status_email(sender, instance, created, raw, using, update_fiel
     if update_fields is not None and "status" not in update_fields:
         return
     saved_order = sender.objects.using(using).values(
-        "pk", "customer_number", "full_name", "email", "status",
+        "pk", "customer_number", "full_name", "email", "phone", "status",
     ).get(pk=instance.pk)
     if saved_order["status"] == previous_status:
         return
@@ -54,6 +54,20 @@ def _queue_order_status_email(sender, instance, created, raw, using, update_fiel
         using=using,
         robust=True,
     )
+    if saved_order["status"] == sender.Status.CANCELLED:
+        saved_order["previous_status_display"] = dict(sender.Status.choices).get(
+            previous_status, previous_status,
+        )
+        saved_order["items"] = list(
+            instance.items.using(using).order_by("pk").values(
+                "product_name", "quantity", "unit",
+            )
+        )
+        transaction.on_commit(
+            lambda order_data=saved_order: _send_order_cancelled_email(order_data),
+            using=using,
+            robust=True,
+        )
 
 
 def _send_order_status_email(order_data):
@@ -80,4 +94,35 @@ def _send_order_status_email(order_data):
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order_data["email"]],
         reply_to=[settings.MANAGER_EMAIL],
+    ).send(using="default")
+
+
+
+def _send_order_cancelled_email(order_data):
+    lines = [
+        f"Заявку №{order_data['customer_number']} скасовано.",
+        f"Внутрішній ID заявки: {order_data['pk']}",
+        f"Клієнт: {order_data['full_name']}",
+        f"Електронна пошта: {order_data['email']}",
+        f"Телефон: {order_data['phone']}",
+        f"Попередній статус: {order_data['previous_status_display']}.",
+        f"Поточний статус: {order_data['status_display']}.",
+        "",
+        "Товари у скасованій заявці:",
+    ]
+    for item in order_data["items"]:
+        quantity = format(item["quantity"], ".0f" if item["unit"] == "pcs" else ".2f")
+        quantity = quantity.replace(".", ",")
+        unit = "шт" if item["unit"] == "pcs" else "кг"
+        lines.append(f"- {item['product_name']} — {quantity} {unit}")
+    lines.extend([
+        "",
+        "Перевірте заявку в панелі адміністрування та врахуйте скасування під час роботи.",
+    ])
+    EmailMessage(
+        subject=f"Скасовано заявку №{order_data['customer_number']} (ID {order_data['pk']})",
+        body="\n".join(lines),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[settings.MANAGER_EMAIL],
+        reply_to=[order_data["email"]],
     ).send(using="default")

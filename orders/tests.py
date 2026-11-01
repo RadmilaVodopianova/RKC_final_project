@@ -357,15 +357,18 @@ class OrderStatusEmailTests(TestCase):
     def test_creation_does_not_send_status_email(self):
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_real_changes_send_one_email_each(self):
+    def test_real_changes_notify_customer_and_manager_on_cancellation(self):
         for index, status in enumerate((Order.Status.PROCESSING, Order.Status.CONFIRMED,
                                         Order.Status.COMPLETED, Order.Status.CANCELLED), 1):
             with self.subTest(status=status):
                 with self.captureOnCommitCallbacks(execute=True) as callbacks:
                     self.save_status(status)
-                self.assertEqual(len(callbacks), 1)
-                self.assertEqual(len(mail.outbox), index)
-                message = mail.outbox[-1]
+                expected_count = 2 if status == Order.Status.CANCELLED else 1
+                self.assertEqual(len(callbacks), expected_count)
+                self.assertEqual(len(mail.outbox), index + expected_count - 1)
+                message = mail.outbox[-expected_count]
+                if status == Order.Status.CANCELLED:
+                    self.assertEqual(mail.outbox[-1].to, ["manager@example.test"])
                 self.assertEqual(message.to, ["customer@example.test"])
                 self.assertEqual(message.reply_to, ["manager@example.test"])
                 self.assertIn("№7", message.subject)
@@ -457,6 +460,123 @@ class OrderStatusEmailTests(TestCase):
         self.assertIn("В обробці", mail.outbox[0].subject)
         self.assertIn("Погоджена", mail.outbox[1].subject)
 
+    def test_manager_cancellation_email_contains_saved_details_and_waits_for_commit(self):
+        self.order.items.create(product_name="Ковбаса на момент заявки", quantity="1.25", unit="kg")
+        self.order.items.create(product_name="Сардельки", quantity="2", unit="pcs")
+        self.order.email = "unsaved@example.test"
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            self.save_status(Order.Status.CANCELLED)
+        self.assertEqual(len(callbacks), 2)
+        self.assertEqual(len(mail.outbox), 0)
+        for callback in callbacks:
+            callback()
+        message = mail.outbox[1]
+        self.assertEqual(message.to, ["manager@example.test"])
+        self.assertEqual(message.from_email, "sender@example.test")
+        self.assertEqual(message.reply_to, ["customer@example.test"])
+        self.assertEqual(message.subject, f"Скасовано заявку №7 (ID {self.order.pk})")
+        for text in (
+            "Тестовий клієнт", "customer@example.test", "+380000000000",
+            "Попередній статус: Нова.", "Поточний статус: Скасована.",
+            "Ковбаса на момент заявки — 1,25 кг", "Сардельки — 2 шт",
+        ):
+            self.assertIn(text, message.body)
+
+    def test_cancellation_rollback_sends_neither_email(self):
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
+            with self.assertRaises(ValueError):
+                with transaction.atomic():
+                    self.save_status(Order.Status.CANCELLED)
+                    raise ValueError("QA rollback cancellation")
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.NEW)
+        self.assertEqual(callbacks, [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_admin_single_cancellation_does_not_repeat_emails_on_save(self):
+        request = RequestFactory().post("/admin/orders/order/")
+        model_admin = OrderAdmin(Order, admin.site)
+        self.order.status = Order.Status.CANCELLED
+        with self.captureOnCommitCallbacks(execute=True):
+            model_admin.save_model(request, self.order, form=None, change=True)
+            model_admin.save_model(request, self.order, form=None, change=True)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].to, ["manager@example.test"])
+
+    def test_admin_bulk_cancellation_notifies_only_changed_orders_once(self):
+        other = Order.objects.create(
+            customer_number=8, full_name="Інший клієнт", email="other@example.test",
+            phone="+380000000000",
+        )
+        already_cancelled = Order.objects.create(
+            customer_number=9, full_name="Скасована раніше", email="old@example.test",
+            phone="+380000000000", status=Order.Status.CANCELLED,
+        )
+        request = RequestFactory().post("/admin/orders/order/")
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        model_admin = OrderAdmin(Order, admin.site)
+        queryset = Order.objects.filter(pk__in=[self.order.pk, other.pk, already_cancelled.pk])
+        with self.captureOnCommitCallbacks(execute=True):
+            model_admin.mark_cancelled(request, queryset)
+            model_admin.mark_cancelled(request, queryset)
+        self.assertEqual(len(mail.outbox), 4)
+        manager_messages = [message for message in mail.outbox if message.to == ["manager@example.test"]]
+        self.assertEqual(len(manager_messages), 2)
+        self.assertEqual(len({message.subject for message in manager_messages}), 2)
+        self.assertFalse(any(message.to == ["old@example.test"] for message in mail.outbox))
+
+    def test_cancellation_notice_keeps_snapshot_if_order_changes_before_sending(self):
+        item = self.order.items.create(product_name="Початкова назва", quantity="1.25", unit="kg")
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            self.save_status(Order.Status.CANCELLED)
+        Order.objects.filter(pk=self.order.pk).update(
+            full_name="Інше ім’я", email="changed@example.test", status=Order.Status.PROCESSING,
+        )
+        self.order.items.filter(pk=item.pk).update(product_name="Змінена назва", quantity="8")
+        for callback in callbacks:
+            callback()
+        message = mail.outbox[1]
+        self.assertIn("Тестовий клієнт", message.body)
+        self.assertIn("Поточний статус: Скасована.", message.body)
+        self.assertIn("Початкова назва — 1,25 кг", message.body)
+        self.assertEqual(message.reply_to, ["customer@example.test"])
+        self.assertNotIn("Змінена назва", message.body)
+
+    def test_customer_email_failure_does_not_prevent_manager_cancellation_notice(self):
+        original_send = mail.EmailMessage.send
+
+        def send_message(message, *args, **kwargs):
+            if message.to == ["customer@example.test"]:
+                raise OSError("QA customer mail unavailable")
+            return original_send(message, *args, **kwargs)
+
+        with patch("orders.apps.EmailMessage.send", autospec=True, side_effect=send_message):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    self.save_status(Order.Status.CANCELLED)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["manager@example.test"])
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)
+
+    def test_manager_email_failure_does_not_prevent_customer_cancellation_notice(self):
+        original_send = mail.EmailMessage.send
+
+        def send_message(message, *args, **kwargs):
+            if message.to == ["manager@example.test"]:
+                raise OSError("QA manager mail unavailable")
+            return original_send(message, *args, **kwargs)
+
+        with patch("orders.apps.EmailMessage.send", autospec=True, side_effect=send_message):
+            with self.assertLogs(level="ERROR"):
+                with self.captureOnCommitCallbacks(execute=True):
+                    self.save_status(Order.Status.CANCELLED)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["customer@example.test"])
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)
+
     def test_raw_fixture_save_does_not_send_email(self):
         self.order.status = Order.Status.PROCESSING
         with self.captureOnCommitCallbacks(execute=True) as callbacks:
@@ -482,14 +602,16 @@ class OrderCancellationTests(TestCase):
         self.detail_url = reverse("order_detail", args=[self.order.pk])
         self.client.force_login(self.owner)
 
-    def test_owner_can_cancel_new_order_and_receives_one_email(self):
+    def test_owner_cancellation_notifies_customer_and_manager(self):
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.post(self.url)
         self.assertRedirects(response, self.detail_url, fetch_redirect_response=False)
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, Order.Status.CANCELLED)
         self.assertEqual(self.order.customer_number, 3)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].to, ["manager@example.test"])
+        self.assertIn("Скасовано заявку №3", mail.outbox[1].subject)
         self.assertEqual(mail.outbox[0].to, ["owner@example.test"])
         self.assertIn("Скасована", mail.outbox[0].body)
         self.assertContains(self.client.get(self.detail_url), "Заявку №3 скасовано.")
@@ -532,7 +654,9 @@ class OrderCancellationTests(TestCase):
         with self.captureOnCommitCallbacks(execute=True):
             self.client.post(self.url)
             self.client.post(self.url)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(sum(message.to == ["manager@example.test"] for message in mail.outbox), 1)
+        self.assertEqual(sum(message.to == ["owner@example.test"] for message in mail.outbox), 1)
 
     def test_button_is_shown_only_for_new_order(self):
         action = f'action="{self.url}"'
