@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -33,11 +32,13 @@ class Migration(migrations.Migration):
                 ('image', models.ImageField(blank=True, upload_to='products/', verbose_name='Фото товару')),
                 ('composition', models.TextField(blank=True, verbose_name='Склад')),
                 ('nutritional_value', models.TextField(blank=True, verbose_name='Харчова цінність на 100 г')),
-                ('energy_value', models.CharField(blank=True, max_length=200, verbose_name='Енергетична цінність на 100 г')),
+                ('energy_value',
+                 models.CharField(blank=True, max_length=200, verbose_name='Енергетична цінність на 100 г')),
                 ('shelf_life', models.CharField(blank=True, max_length=250, verbose_name='Строк зберігання')),
                 ('storage_conditions', models.TextField(blank=True, verbose_name='Умови зберігання')),
                 ('is_active', models.BooleanField(default=True, verbose_name='Показувати в каталозі')),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='products', to='core.category', verbose_name='Підгрупа')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='products',
+                                               to='core.category', verbose_name='Підгрупа')),
             ],
             options={
                 'verbose_name': 'Товар',

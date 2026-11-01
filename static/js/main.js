@@ -63,7 +63,7 @@ document.querySelectorAll("[data-quantity-control]").forEach((control) => {
             } else {
                 input.stepUp(Number(button.dataset.quantityChange));
             }
-            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("input", {bubbles: true}));
         });
         button.hidden = false;
     });
@@ -87,7 +87,7 @@ if (siteHeader) {
         );
     };
 
-    window.addEventListener("scroll", updateHeader, { passive: true });
+    window.addEventListener("scroll", updateHeader, {passive: true});
     window.addEventListener("pageshow", updateHeader);
     desktopHeader.addEventListener("change", updateHeader);
     updateHeader();
@@ -212,7 +212,7 @@ document.querySelectorAll("[data-category-marquee]").forEach((marquee) => {
         resizeFrame = requestAnimationFrame(updateMarquee);
     };
 
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, {passive: true});
     motion.addEventListener("change", scheduleUpdate);
     new MutationObserver(scheduleUpdate).observe(document.documentElement, {
         attributes: true,
@@ -267,9 +267,9 @@ function enhanceSiteMessage(message) {
             return;
         }
         message.animate([
-            { opacity: 1, transform: "translateY(0)" },
-            { opacity: 0, transform: "translateY(12px)" }
-        ], { duration: 180, easing: "ease-in", fill: "forwards" })
+            {opacity: 1, transform: "translateY(0)"},
+            {opacity: 0, transform: "translateY(12px)"}
+        ], {duration: 180, easing: "ease-in", fill: "forwards"})
             .finished.then(removeMessage, removeMessage);
     };
     const restartTimer = () => {
@@ -290,9 +290,9 @@ function enhanceSiteMessage(message) {
 
     if (!messageMotion.matches && message.animate) {
         message.animate([
-            { opacity: 0, transform: "translateY(12px)" },
-            { opacity: 1, transform: "translateY(0)" }
-        ], { duration: 220, easing: "ease-out" });
+            {opacity: 0, transform: "translateY(12px)"},
+            {opacity: 1, transform: "translateY(0)"}
+        ], {duration: 220, easing: "ease-out"});
     }
 }
 
@@ -363,10 +363,10 @@ function animateCartAddition(form) {
         return;
     }
     counter.animate([
-        { transform: "scale(1)" },
-        { transform: "scale(1.2)" },
-        { transform: "scale(1)" }
-    ], { duration: 320, easing: "ease-out" });
+        {transform: "scale(1)"},
+        {transform: "scale(1.2)"},
+        {transform: "scale(1)"}
+    ], {duration: 320, easing: "ease-out"});
 
     const product = form.closest(".product-card, .product-detail");
     const image = product?.querySelector(".product-card-image img, .product-detail-photo img");
@@ -396,10 +396,10 @@ function animateCartAddition(form) {
     flight.style.top = (startY - 50) + "px";
     document.body.append(flight);
     flight.animate([
-        { transform: "translate(0, 0) scale(1)", opacity: 0.95 },
-        { transform: `translate(${deltaX * 0.5}px, ${deltaY * 0.5 - 40}px) scale(0.65)`, opacity: 0.8 },
-        { transform: `translate(${deltaX}px, ${deltaY}px) scale(0.15)`, opacity: 0 }
-    ], { duration: 650, easing: "ease-in-out", fill: "forwards" })
+        {transform: "translate(0, 0) scale(1)", opacity: 0.95},
+        {transform: `translate(${deltaX * 0.5}px, ${deltaY * 0.5 - 40}px) scale(0.65)`, opacity: 0.8},
+        {transform: `translate(${deltaX}px, ${deltaY}px) scale(0.15)`, opacity: 0}
+    ], {duration: 650, easing: "ease-in-out", fill: "forwards"})
         .finished.then(() => flight.remove(), () => flight.remove());
 }
 
@@ -482,32 +482,39 @@ document.querySelectorAll(".selection-track").forEach((track) => {
         previous.disabled = track.scrollLeft <= 8;
         next.disabled = track.scrollLeft >= maximum - 2;
         const bounds = track.getBoundingClientRect();
-        const visible = cards.map((card, index) => ({ bounds: card.getBoundingClientRect(), index }))
+        const visible = cards.map((card, index) => ({bounds: card.getBoundingClientRect(), index}))
             .filter((card) => card.bounds.right > bounds.left + 12 && card.bounds.left < bounds.right - 12);
         if (visible.length) position.textContent = `Показано товари ${visible[0].index + 1}–${visible[visible.length - 1].index + 1} із ${cards.length}`;
     };
-    const schedule = () => { cancelAnimationFrame(updateFrame); updateFrame = requestAnimationFrame(update); };
+    const schedule = () => {
+        cancelAnimationFrame(updateFrame);
+        updateFrame = requestAnimationFrame(update);
+    };
     const move = (direction) => {
         const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
         const cardWidth = cards[0].getBoundingClientRect().width + gap;
         const pageSize = Math.max(1, Math.floor((track.clientWidth + gap) / cardWidth));
         const target = Math.max(0, Math.min(track.scrollWidth - track.clientWidth, track.scrollLeft + direction * pageSize * cardWidth));
-        track.scrollTo({ left: target, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        track.scrollTo({
+            left: target,
+            behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"
+        });
     };
     previous.addEventListener("click", () => move(-1));
     next.addEventListener("click", () => move(1));
-    track.addEventListener("scroll", schedule, { passive: true });
+    track.addEventListener("scroll", schedule, {passive: true});
     track.addEventListener("keydown", (event) => {
         if (event.target !== track) return;
         if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1);
+            event.preventDefault();
+            move(event.key === "ArrowLeft" ? -1 : 1);
         } else if (event.key === "Home" || event.key === "End") {
             event.preventDefault();
-            track.scrollTo({ left: event.key === "Home" ? 0 : track.scrollWidth, behavior: "instant" });
+            track.scrollTo({left: event.key === "Home" ? 0 : track.scrollWidth, behavior: "instant"});
         }
     });
     if (window.ResizeObserver) new ResizeObserver(schedule).observe(track);
-    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("resize", schedule, {passive: true});
     if (document.fonts) document.fonts.ready.then(schedule);
     update();
 });
@@ -537,7 +544,7 @@ document.querySelectorAll(".selection-track").forEach((track) => {
         value.setAttribute("aria-hidden", "true");
         value.textContent = "0";
         element.replaceChildren(accessible, value);
-        const state = { frame: 0, value };
+        const state = {frame: 0, value};
         running.set(element, state);
         let started;
         const tick = (time) => {
@@ -545,19 +552,27 @@ document.querySelectorAll(".selection-track").forEach((track) => {
             const progress = Math.min(1, (time - started) / 1600);
             value.textContent = String(Math.round(target * (1 - Math.pow(1 - progress, 3))));
             if (progress < 1 && !motion.matches) state.frame = requestAnimationFrame(tick);
-            else { value.textContent = String(target); running.delete(element); }
+            else {
+                value.textContent = String(target);
+                running.delete(element);
+            }
         };
         state.frame = requestAnimationFrame(tick);
     };
     if (!motion.matches && window.IntersectionObserver) {
         observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
-                if (entry.isIntersecting) { observer.unobserve(entry.target); animateCounter(entry.target); }
+                if (entry.isIntersecting) {
+                    observer.unobserve(entry.target);
+                    animateCounter(entry.target);
+                }
             });
-        }, { threshold: 0.4 });
+        }, {threshold: 0.4});
         counters.forEach((element) => observer.observe(element));
     }
-    motion.addEventListener("change", () => { if (motion.matches) finish(); });
+    motion.addEventListener("change", () => {
+        if (motion.matches) finish();
+    });
 
     // Пройдені відрізки шкали заявки заповнюються послідовно.
     if (!motion.matches && Element.prototype.animate) {
@@ -569,7 +584,7 @@ document.querySelectorAll(".selection-track").forEach((track) => {
                 fill.className = "order-step-fill";
                 fill.setAttribute("aria-hidden", "true");
                 step.append(fill);
-                animations.push(fill.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], {
+                animations.push(fill.animate([{transform: "scaleX(0)"}, {transform: "scaleX(1)"}], {
                     duration: 450, delay: index * 140, easing: "ease-out", fill: "backwards"
                 }));
             });

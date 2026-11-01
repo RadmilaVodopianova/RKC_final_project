@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0002_contactmessage'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -18,14 +17,17 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата додавання')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to='core.product', verbose_name='Товар')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL, verbose_name='Користувач')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites',
+                                              to='core.product', verbose_name='Товар')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites',
+                                           to=settings.AUTH_USER_MODEL, verbose_name='Користувач')),
             ],
             options={
                 'verbose_name': 'Обраний товар',
                 'verbose_name_plural': 'Обрані товари',
                 'ordering': ['-created_at'],
-                'constraints': [models.UniqueConstraint(fields=('user', 'product'), name='unique_user_favorite_product')],
+                'constraints': [
+                    models.UniqueConstraint(fields=('user', 'product'), name='unique_user_favorite_product')],
             },
         ),
     ]
