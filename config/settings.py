@@ -216,6 +216,13 @@ UNFOLD = {
     "SITE_HEADER": "Роздільнянський ковбасний цех",
     "SITE_SUBHEADER": "Керування сайтом і заявками",
     "SITE_ICON": lambda request: static("images/logo.png"),
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "type": "image/png",
+            "href": lambda request: static("images/logo.png"),
+        },
+    ],
     "SITE_URL": reverse_lazy("home"),
     "THEME": "light",
     "BORDER_RADIUS": "10px",
