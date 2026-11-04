@@ -3654,9 +3654,11 @@ p {
 
 .heritage-home #featured-products .selection-track {
     display: flex;
+    width: calc(100% + 8px);
     gap: 22px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: 4px;
     scrollbar-width: thin;
     scrollbar-color: var(--gold) var(--light);
     padding: 8px 4px 22px;
@@ -3720,7 +3722,7 @@ p {
 
 @media (max-width: 600px) {
     .heritage-home .selection-track > .product-card {
-        flex-basis: 88%;
+        flex-basis: 100%;
     }
 
     .selection-controls {
