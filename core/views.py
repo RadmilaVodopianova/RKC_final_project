@@ -280,4 +280,13 @@ def favorites(request):
 # =========================
 
 def privacy(request):
-    return render(request, "privacy.html")
+    return render(
+        request,
+        "privacy.html",
+        {
+            "policy_base_template": (
+                "base.html" if request.user.is_authenticated
+                else "privacy_public_base.html"
+            ),
+        },
+    )

@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Політика конфіденційності{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=55">
+</head>
+<body class="privacy-public-page">
+    <a class="privacy-skip-link" href="#policy-title">Перейти до політики</a>
+    <header class="privacy-public-header">
+        <div class="access-brand">
+            <img src="{% static 'images/logo.png' %}" alt="Роздільнянський ковбасний цех" width="64" height="76">
+            <p>Роздільнянський<span>КОВБАСНИЙ ЦЕХ</span></p>
+        </div>
+        <nav class="privacy-public-navigation" aria-label="Доступ до сайту">
+            <a class="text-link" href="{% url 'login' %}">Увійти</a>
+            <a class="text-link" href="{% url 'register' %}">Запит на доступ</a>
+        </nav>
+    </header>
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

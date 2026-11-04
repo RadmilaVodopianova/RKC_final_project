@@ -29,6 +29,18 @@ class RegistrationForm(UserCreationForm):
         ),
     )
 
+    privacy_acknowledged = forms.BooleanField(
+        label=(
+            "Підтверджую ознайомлення з Політикою конфіденційності "
+            "та обробки персональних даних."
+        ),
+        required=True,
+        initial=False,
+        error_messages={
+            "required": "Ознайомтеся з політикою та підтвердьте це галочкою.",
+        },
+    )
+
     class Meta:
         model = User
         fields = (
@@ -37,6 +49,7 @@ class RegistrationForm(UserCreationForm):
             "email",
             "password1",
             "password2",
+            "privacy_acknowledged",
         )
 
     def clean_email(self):

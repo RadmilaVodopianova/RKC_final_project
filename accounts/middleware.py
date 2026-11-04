@@ -10,7 +10,7 @@ from django.utils.cache import patch_cache_control
 
 
 class ApprovedAccessMiddleware:
-    public_views = {"login", "register", "logout", "admin:login", "admin:logout"}
+    public_views = {"login", "register", "logout", "privacy", "admin:login", "admin:logout"}
     public_asset_extensions = {".css", ".js", ".woff", ".woff2", ".ttf", ".eot"}
 
     def __init__(self, get_response):

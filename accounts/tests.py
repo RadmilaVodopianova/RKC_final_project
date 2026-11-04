@@ -19,7 +19,7 @@ class PrivateAccessTests(TestCase):
         self.product = Product.objects.create(name="Приватний товар", category=category)
 
     def test_guest_cannot_open_any_site_section(self):
-        paths = ["/", "/about/", "/contacts/", "/catalog/", "/privacy/", "/account/", "/cart/",
+        paths = ["/", "/about/", "/contacts/", "/catalog/", "/account/", "/cart/",
                  reverse("product_detail", args=[self.product.pk]), "/orders/create/", "/admin/"]
         for path in paths:
             with self.subTest(path=path):
@@ -52,6 +52,7 @@ class PrivateAccessTests(TestCase):
         response = self.client.post(reverse("register"), {
             "first_name": "Новий", "last_name": "Клієнт", "email": "new@example.test",
             "password1": "New-private-pass-2026!", "password2": "New-private-pass-2026!",
+            "privacy_acknowledged": "on",
         })
         self.assertRedirects(response, reverse("login"))
         pending = get_user_model().objects.get(email="new@example.test")
@@ -129,6 +130,7 @@ class PrivateAccessTests(TestCase):
         self.client.post(reverse("register"), {
             "first_name": "Новий", "last_name": "Клієнт", "email": "flags@example.test",
             "password1": "New-private-pass-2026!", "password2": "New-private-pass-2026!",
+            "privacy_acknowledged": "on",
             "is_active": "True", "is_staff": "True", "is_superuser": "True",
         })
         pending = get_user_model().objects.get(email="flags@example.test")
@@ -185,3 +187,94 @@ class PrivateAccessTests(TestCase):
     def test_guest_unknown_url_does_not_reveal_a_private_error_page(self):
         response = self.client.get("/unknown-private-page/")
         self.assertEqual(response.status_code, 302)
+
+
+class PrivacyRegistrationTests(TestCase):
+    def registration_data(self):
+        return {
+            "first_name": "Тестовий",
+            "last_name": "Клієнт",
+            "email": "privacy@example.test",
+            "password1": "Privacy-private-pass-2026!",
+            "password2": "Privacy-private-pass-2026!",
+            "privacy_acknowledged": "on",
+        }
+
+    def test_guest_can_read_full_policy_without_private_navigation(self):
+        response = self.client.get(reverse("privacy"))
+        self.assertContains(response, "Водоп’янов Андрій Миколайович")
+        self.assertContains(response, "04 листопада 2026 року")
+        self.assertContains(response, "rkcvk.rozdilna@gmail.com")
+        self.assertContains(response, "Google Fonts")
+        self.assertContains(response, "jsDelivr")
+        for section in range(1, 13):
+            self.assertContains(response, f'id="policy-section-{section}"')
+        self.assertContains(response, f'href="{reverse("register")}"')
+        self.assertContains(response, f'href="{reverse("login")}"')
+        self.assertNotContains(response, 'class="main-navigation"')
+        self.assertNotContains(response, 'class="cart-link"')
+        self.assertNotContains(response, "fonts.googleapis.com")
+        self.assertNotContains(response, "cdn.jsdelivr.net")
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    def test_approved_user_reads_policy_inside_site(self):
+        user = get_user_model().objects.create_user(
+            username="reader@example.test", email="reader@example.test",
+            password="Reader-private-pass-2026!",
+        )
+        self.client.force_login(user)
+        response = self.client.get(reverse("privacy"))
+        self.assertContains(response, 'class="site-header"')
+        self.assertContains(response, 'id="policy-section-12"')
+
+    def test_registration_checkbox_is_required_unchecked_and_links_to_policy(self):
+        response = self.client.get(reverse("register"))
+        field = response.context["form"]["privacy_acknowledged"]
+        self.assertTrue(field.field.required)
+        self.assertFalse(field.value())
+        self.assertContains(response, 'type="checkbox"')
+        self.assertContains(response, 'for="id_privacy_acknowledged"')
+        self.assertContains(response, f'href="{reverse("privacy")}" target="_blank"')
+        self.assertContains(response, "Підтверджую ознайомлення")
+
+    def test_server_rejects_registration_without_acknowledgment(self):
+        from .models import Profile
+
+        for value in (None, "False", ""):
+            with self.subTest(value=value):
+                data = self.registration_data()
+                if value is None:
+                    del data["privacy_acknowledged"]
+                else:
+                    data["privacy_acknowledged"] = value
+                response = self.client.post(reverse("register"), data)
+                self.assertEqual(response.status_code, 200)
+                self.assertFormError(
+                    response.context["form"], "privacy_acknowledged",
+                    "Ознайомтеся з політикою та підтвердьте це галочкою.",
+                )
+                self.assertFalse(get_user_model().objects.exists())
+                self.assertFalse(Profile.objects.exists())
+                self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_acknowledgment_creates_pending_account_without_login(self):
+        response = self.client.post(reverse("register"), self.registration_data())
+        self.assertRedirects(response, reverse("login"))
+        user = get_user_model().objects.get(email="privacy@example.test")
+        self.assertFalse(user.is_active)
+        self.assertTrue(hasattr(user, "profile"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.client.get(reverse("privacy"))
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+        self.assertEqual(self.client.get(reverse("catalog")).status_code, 302)
+
+    def test_policy_exception_does_not_open_other_paths(self):
+        self.assertEqual(self.client.get(reverse("privacy")).status_code, 200)
+        for path in ("/privacy/anything/", "/catalog/", "/account/", "/media/photo.jpg"):
+            with self.subTest(path=path):
+                self.assertEqual(self.client.get(path).status_code, 302)
+
+    def test_login_page_also_links_to_public_policy(self):
+        response = self.client.get(reverse("login"))
+        self.assertContains(response, f'href="{reverse("privacy")}"')

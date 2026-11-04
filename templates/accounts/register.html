@@ -16,6 +16,20 @@
                 {{ form.non_field_errors }}
 
                 {% for field in form %}
+                    {% if field.name == "privacy_acknowledged" %}
+                        <div class="auth-field privacy-acknowledgment">
+                            <div class="privacy-acknowledgment-control">
+                                {{ field }}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            </div>
+                            <p class="privacy-acknowledgment-link">
+                                <a class="text-link" href="{% url 'privacy' %}" target="_blank" rel="noopener noreferrer">
+                                    Прочитати політику (нова вкладка)
+                                </a>
+                            </p>
+                            {{ field.errors }}
+                        </div>
+                    {% else %}
                     <div class="auth-field">
                         <label for="{{ field.id_for_label }}">
                             {{ field.label }}
@@ -31,6 +45,7 @@
 
                         {{ field.errors }}
                     </div>
+                    {% endif %}
                 {% endfor %}
 
                 <button class="button" type="submit">

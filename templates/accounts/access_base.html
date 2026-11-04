@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>{% block title %}Вхід | Роздільнянський ковбасний цех{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=45">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=55">
 </head>
 <body class="access-page">
     <main class="access-main">
@@ -21,6 +21,9 @@
             {% block access_content %}{% endblock %}
         </section>
         <p class="access-footnote">Доступ до сайту надається після схвалення адміністратором.</p>
+        <p class="access-policy-link">
+            <a class="text-link" href="{% url 'privacy' %}">Політика конфіденційності</a>
+        </p>
     </main>
 </body>
 </html>

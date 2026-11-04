@@ -4095,3 +4095,151 @@ p {
         grid-template-columns: minmax(0, 1fr) minmax(72px, .5fr);
     }
 }
+
+/* Політика доступна до входу; підтвердження ознайомлення у формі реєстрації. */
+.privacy-document {
+    max-width: 860px;
+    margin-inline: auto;
+    overflow-wrap: anywhere;
+    line-height: 1.75;
+}
+
+.privacy-document h1 {
+    font-size: clamp(26px, 4vw, 40px);
+    line-height: 1.25;
+}
+
+.privacy-document h2 {
+    margin-top: 36px;
+    font-size: clamp(21px, 3vw, 28px);
+    line-height: 1.35;
+    scroll-margin-top: 220px;
+}
+
+.privacy-document li + li {
+    margin-top: 8px;
+}
+
+.privacy-document ul,
+.privacy-document ol {
+    padding-left: 24px;
+}
+
+.privacy-document a {
+    color: var(--burgundy);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.privacy-edition {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.privacy-contents {
+    margin-block: 24px 36px;
+    padding: 16px 20px;
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    background: var(--light);
+}
+
+.privacy-contents > p {
+    margin-top: 0;
+}
+
+.privacy-public-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: min(100% - 32px, 860px);
+    margin: 24px auto 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gold);
+}
+
+.privacy-public-header .access-brand {
+    margin: 0;
+}
+
+.privacy-public-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+}
+
+.privacy-public-navigation a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+.privacy-public-page .privacy-section {
+    padding-block: 32px 48px;
+}
+
+.privacy-skip-link {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    z-index: 1000;
+    padding: 12px;
+    color: var(--cream);
+    background: var(--burgundy);
+    transform: translateY(-160%);
+}
+
+.privacy-skip-link:focus {
+    transform: translateY(0);
+}
+
+.privacy-acknowledgment-control {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.auth-field.privacy-acknowledgment input[type="checkbox"] {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    min-height: 20px;
+    margin: 4px 0 0;
+    padding: 0;
+    accent-color: var(--burgundy);
+}
+
+.privacy-acknowledgment-control label {
+    min-width: 0;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+    cursor: pointer;
+}
+
+.privacy-acknowledgment-link {
+    margin: 8px 0 0 32px;
+    font-size: 14px;
+}
+
+.access-policy-link {
+    margin: 12px 0 0;
+    text-align: center;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .privacy-section {
+        padding-block: 28px;
+    }
+
+    .privacy-document {
+        font-size: 16px;
+    }
+
+    .privacy-contents {
+        padding: 12px;
+    }
+}
