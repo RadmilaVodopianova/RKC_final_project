@@ -24,6 +24,7 @@
             </div>
 
             <div class="product-detail-info">
+                <div class="product-summary">
                 <a
                     class="product-category-label"
                     href="{% url 'catalog' %}?category={{ product.category.slug|urlencode }}"
@@ -53,6 +54,7 @@
                         {% endif %}
                     </button>
                 </form>
+                </div>
 
                 <div class="product-request-card">
                     <h2>Додати до заявки</h2>
@@ -83,7 +85,7 @@
                                 >
                             </div>
                             <div class="auth-field">
-                                <label for="product-unit">Одиниця виміру</label>
+                                <label for="product-unit">Одиниця</label>
                                 <select id="product-unit" name="unit">
                                     <option value="kg">кг</option>
                                     <option value="pcs">шт</option>
