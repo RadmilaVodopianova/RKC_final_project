@@ -140,3 +140,115 @@ class FavoriteTests(TestCase):
         self.assertContains(empty, "Поки що немає обраних товарів")
         self.assertNotContains(empty, "data-favorite-card")
         self.assertNotContains(empty, "data-favorites-empty hidden")
+
+
+class CatalogSearchTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(
+            username="search@example.test", email="search@example.test",
+            password="Search-test-only-2026!",
+        )
+        cls.category = Category.objects.create(name="Варені", slug="search-vareni")
+        cls.other_category = Category.objects.create(name="Копченості", slug="search-kopchenosti")
+        cls.product = Product.objects.create(name="Брестська 1с.вар.", category=cls.category)
+        cls.lowercase = Product.objects.create(name="ковбаса домашня", category=cls.category)
+        cls.ukrainian = Product.objects.create(
+            name="Їжак Єгерська Ґаздівська Індича", category=cls.category,
+        )
+        cls.other = Product.objects.create(name="Брестська копчена", category=cls.other_category)
+        cls.inactive = Product.objects.create(
+            name="БРЕСТ прихована", category=cls.category, is_active=False,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.url = reverse("catalog")
+
+    def search(self, query, **parameters):
+        response = self.client.get(self.url, {"q": query, **parameters})
+        self.assertEqual(response.status_code, 200)
+        return response
+
+    def test_cyrillic_search_ignores_letter_case(self):
+        for query in ("Брест", "брест", "БРЕСТ", "бРеСт"):
+            with self.subTest(query=query):
+                response = self.search(query)
+                self.assertEqual(
+                    {product.pk for product in response.context["products"]},
+                    {self.product.pk, self.other.pk},
+                )
+
+    def test_uppercase_query_matches_lowercase_stored_name(self):
+        response = self.search("ДОМАШНЯ")
+        self.assertEqual([product.pk for product in response.context["products"]], [self.lowercase.pk])
+
+    def test_ukrainian_specific_letters_match_in_both_cases(self):
+        for query in ("їжак", "ЇЖАК", "єгерська", "ЄГЕРСЬКА", "ґаздівська", "ҐАЗДІВСЬКА", "індича", "ІНДИЧА"):
+            with self.subTest(query=query):
+                response = self.search(query)
+                self.assertEqual([product.pk for product in response.context["products"]], [self.ukrainian.pk])
+
+    def test_special_characters_are_literal_search_text(self):
+        for query in (".", "[", "(", "+", "*", "%", "_", "?", "|", "^", "$", chr(92), "x.*y"):
+            with self.subTest(query=query):
+                product = Product.objects.create(name="Тест " + query + " буквальний", category=self.category)
+                response = self.search(query)
+                expected = {
+                    item.pk for item in Product.objects.filter(is_active=True)
+                    if query.casefold() in item.name.casefold()
+                }
+                self.assertEqual({item.pk for item in response.context["products"]}, expected)
+                product.delete()
+
+    def test_search_keeps_category_and_excludes_inactive_products(self):
+        response = self.search("брест", category=self.category.slug)
+        self.assertEqual([product.pk for product in response.context["products"]], [self.product.pk])
+        self.assertEqual(response.context["selected_category"], self.category.slug)
+
+    def test_search_trims_whitespace_and_returns_no_unrelated_products(self):
+        response = self.search("  бРеСт  ", category=self.category.slug)
+        self.assertEqual(response.context["query"], "бРеСт")
+        self.assertEqual([product.pk for product in response.context["products"]], [self.product.pk])
+        self.assertEqual(self.search("неіснуючий товар").context["page_obj"].paginator.count, 0)
+
+    def test_empty_query_shows_active_products(self):
+        response = self.search("   ")
+        self.assertEqual(response.context["page_obj"].paginator.count, 4)
+
+    def test_search_preserves_pagination_links_and_favorite_state(self):
+        Product.objects.bulk_create([
+            Product(name=f"Пошуковий {number:02}", category=self.category)
+            for number in range(25)
+        ])
+        Favorite.objects.create(user=self.user, product=self.product)
+        response = self.search("брест", category=self.category.slug)
+        self.assertIn(self.product.pk, response.context["favorite_product_ids"])
+        first = self.search("ПОШУКОВИЙ", category=self.category.slug)
+        self.assertEqual(first.context["page_obj"].paginator.count, 25)
+        self.assertEqual(len(first.context["products"]), 24)
+        from urllib.parse import parse_qs, urlsplit
+        from html.parser import HTMLParser
+
+        class Links(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.urls = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "a":
+                    self.urls.extend(value for name, value in attrs if name == "href")
+
+        links = Links()
+        links.feed(first.content.decode())
+        pages = [parse_qs(urlsplit(url).query) for url in links.urls]
+        self.assertIn(
+            {"q": ["ПОШУКОВИЙ"], "category": [self.category.slug], "page": ["2"]},
+            pages,
+        )
+        second = self.search("ПОШУКОВИЙ", category=self.category.slug, page=2)
+        self.assertEqual(len(second.context["products"]), 1)
+        self.assertFalse(
+            {item.pk for item in first.context["products"]}
+            & {item.pk for item in second.context["products"]}
+        )

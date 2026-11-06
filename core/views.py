@@ -1,4 +1,5 @@
 import random
+import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -143,7 +144,8 @@ def catalog(request):
     categories = Category.objects.all()
 
     if query:
-        products = products.filter(name__icontains=query)
+        # Unicode-пошук у SQLite; спецсимволи запиту шукаємо як звичайний текст.
+        products = products.filter(name__iregex=re.escape(query))
 
     if selected_category:
         products = products.filter(
