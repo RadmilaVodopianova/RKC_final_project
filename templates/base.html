@@ -229,53 +229,11 @@
 
 <!-- ОСНОВНИЙ JAVASCRIPT -->
 <script
-    src="{% static 'js/main.js' %}?v=44"
+    src="{% static 'js/main.js' %}?v=59"
     defer
 ></script>
 
-<!-- ЗБЕРЕЖЕННЯ ПОЗИЦІЇ ПІСЛЯ НАТИСКАННЯ НА СЕРДЕЧКО -->
-<script>
-    document.addEventListener("submit", function (event) {
-        const form = event.target;
 
-        if (!form.matches('form[action*="/favorites/toggle/"]')) {
-            return;
-        }
-
-        const key = "favorite-scroll:" +
-            window.location.pathname +
-            window.location.search;
-
-        sessionStorage.setItem(key, String(window.scrollY));
-    });
-
-    window.addEventListener("pageshow", function () {
-        const key = "favorite-scroll:" +
-            window.location.pathname +
-            window.location.search;
-
-        const savedPosition = sessionStorage.getItem(key);
-
-        if (savedPosition === null) {
-            return;
-        }
-
-        sessionStorage.removeItem(key);
-
-        const scrollPosition = Number(savedPosition);
-
-        if (!Number.isFinite(scrollPosition)) {
-            return;
-        }
-
-        requestAnimationFrame(function () {
-            window.scrollTo({
-                top: scrollPosition,
-                behavior: "instant"
-            });
-        });
-    });
-</script>
 
 </body>
 </html>

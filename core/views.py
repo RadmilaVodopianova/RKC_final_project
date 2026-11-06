@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -217,23 +218,39 @@ def toggle_favorite(request, pk):
         is_active=True,
     )
 
-    favorite, created = Favorite.objects.get_or_create(
-        user=request.user,
-        product=product,
-    )
+    action = request.POST.get("favorite_action", "toggle")
+    if action not in ("toggle", "add", "remove"):
+        return JsonResponse({
+            "ok": False,
+            "message": "Некоректна дія з обраним товаром.",
+        }, status=400)
 
-    if created:
-        messages.success(
-            request,
-            "Товар додано до обраного ❤️",
-        )
+    if action == "remove":
+        Favorite.objects.filter(user=request.user, product=product).delete()
+        is_favorite = False
     else:
-        favorite.delete()
-
-        messages.success(
-            request,
-            "Товар видалено з обраного.",
+        favorite, created = Favorite.objects.get_or_create(
+            user=request.user,
+            product=product,
         )
+        is_favorite = True
+        if action == "toggle" and not created:
+            favorite.delete()
+            is_favorite = False
+
+    message = (
+        "Товар додано до обраного ❤️" if is_favorite
+        else "Товар видалено з обраного."
+    )
+    if "application/json" in request.headers.get("Accept", ""):
+        return JsonResponse({
+            "ok": True,
+            "product_id": product.pk,
+            "is_favorite": is_favorite,
+            "message": message,
+        })
+
+    messages.success(request, message)
 
     # Повернення на попередню сторінку
     next_url = request.POST.get("next", "")

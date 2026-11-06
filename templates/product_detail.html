@@ -35,6 +35,11 @@
 
                 <form
                     class="product-favorite-form"
+                    data-favorite-form
+                    data-product-id="{{ product.pk }}"
+                    data-product-name="{{ product.name }}"
+                    data-filled-icon="{% static 'images/heart-filled.png' %}"
+                    data-outline-icon="{% static 'images/heart-outline.png' %}"
                     method="post"
                     action="{% url 'toggle_favorite' product.pk %}"
                 >
@@ -44,14 +49,18 @@
                         name="next"
                         value="{% url 'product_detail' product.pk %}"
                     >
-                    <button class="product-favorite-button" type="submit">
+                    <button
+                        class="product-favorite-button"
+                        type="submit"
+                        aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}"
+                        aria-label="{% if is_favorite %}Видалити з обраного{% else %}Додати до обраного{% endif %}: {{ product.name }}"
+                    >
                         {% if is_favorite %}
                             <img src="{% static 'images/heart-filled.png' %}" alt="" width="24" height="24">
-                            Видалити з обраного
                         {% else %}
                             <img src="{% static 'images/heart-outline.png' %}" alt="" width="24" height="24">
-                            Додати до обраного
                         {% endif %}
+                        <span data-favorite-label>{% if is_favorite %}Видалити з обраного{% else %}Додати до обраного{% endif %}</span>
                     </button>
                 </form>
                 </div>

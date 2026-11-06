@@ -598,3 +598,129 @@ document.querySelectorAll(".selection-track").forEach((track) => {
         });
     }
 })();
+
+
+// Обране: змінюємо лише стан кнопок, без повторного завантаження сторінки.
+const pendingFavorites = new Set();
+
+function favoriteForms(productId) {
+    return Array.from(document.querySelectorAll("[data-favorite-form]"))
+        .filter((form) => form.dataset.productId === productId);
+}
+
+function updateFavoriteButtons(productId, isFavorite) {
+    favoriteForms(productId).forEach((form) => {
+        const button = form.querySelector('button[type="submit"]');
+        const label = isFavorite ? "Видалити з обраного" : "Додати до обраного";
+        button.setAttribute("aria-pressed", String(isFavorite));
+        button.setAttribute("aria-label", label + ": " + form.dataset.productName);
+        button.title = label;
+        button.classList.toggle("is-favorite", isFavorite);
+        const image = button.querySelector("img");
+        if (image) image.src = isFavorite ? form.dataset.filledIcon : form.dataset.outlineIcon;
+        const text = button.querySelector("[data-favorite-label]");
+        if (text) text.textContent = label;
+    });
+}
+
+function removeFavoriteCard(form, button) {
+    const list = form.closest("[data-favorites-list]");
+    const card = form.closest("[data-favorite-card]");
+    if (!list || !card) return;
+    const cards = Array.from(list.querySelectorAll("[data-favorite-card]"));
+    const index = cards.indexOf(card);
+    const nextCard = cards[index + 1] || cards[index - 1];
+    const restoreFocus = document.activeElement === button || document.activeElement === document.body;
+    card.remove();
+    const empty = list.querySelector("[data-favorites-empty]");
+    const hasCards = Boolean(list.querySelector("[data-favorite-card]"));
+    if (empty) empty.hidden = hasCards;
+    if (restoreFocus) {
+        const next = nextCard?.querySelector('button[type="submit"]') || empty?.querySelector("a");
+        next?.focus({preventScroll: true});
+    }
+}
+
+if (window.fetch && window.FormData) {
+    document.addEventListener("submit", async (event) => {
+        const form = event.target;
+        if (!form.matches("[data-favorite-form]")) return;
+        event.preventDefault();
+        const productId = form.dataset.productId;
+        if (pendingFavorites.has(productId)) return;
+        const button = form.querySelector('button[type="submit"]');
+        const body = new FormData(form);
+        // Явний бажаний стан робить повторну спробу безпечною, якщо відповідь загубилася.
+        body.set("favorite_action", button.getAttribute("aria-pressed") === "true" ? "remove" : "add");
+        const controls = favoriteForms(productId).map((item) => {
+            const control = item.querySelector('button[type="submit"]');
+            return {form: item, button: control, wasDisabled: control.disabled};
+        });
+        pendingFavorites.add(productId);
+        controls.forEach((item) => {
+            item.form.setAttribute("aria-busy", "true");
+            item.button.disabled = true;
+        });
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                mode: "same-origin",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json",
+                    "X-CSRFToken": body.get("csrfmiddlewaretoken")
+                },
+                body
+            });
+            if (!response.headers.get("Content-Type")?.includes("application/json")) {
+                showSiteMessage(response.status === 404
+                    ? "Товар більше недоступний. Оновіть каталог."
+                    : "Не вдалося оновити обране. Оновіть сторінку та спробуйте ще раз.", "error");
+                return;
+            }
+            const result = await response.json();
+            if (!response.ok || !result.ok) {
+                showSiteMessage(result.message || "Не вдалося оновити обране.", "error");
+                return;
+            }
+            if (typeof result.is_favorite !== "boolean" || String(result.product_id) !== productId) {
+                throw new Error("Unexpected favorite response");
+            }
+            updateFavoriteButtons(productId, result.is_favorite);
+            if (!result.is_favorite) removeFavoriteCard(form, button);
+            showSiteMessage(result.message);
+        } catch {
+            showSiteMessage("Не вдалося підтвердити зміну. Спробуйте натиснути сердечко ще раз.", "error");
+        } finally {
+            pendingFavorites.delete(productId);
+            controls.forEach((item) => {
+                item.form.removeAttribute("aria-busy");
+                item.button.disabled = item.wasDisabled;
+            });
+        }
+    });
+}
+
+// Запам'ятовування прокрутки потрібне лише для звичайного POST без fetch.
+document.addEventListener("submit", (event) => {
+    if (event.defaultPrevented || !event.target.matches("[data-favorite-form]")) return;
+    try {
+        const key = "favorite-scroll:" + location.pathname + location.search;
+        sessionStorage.setItem(key, String(window.scrollY));
+    } catch {
+        // Відмова сховища браузера не перешкоджає надсиланню звичайної форми.
+    }
+});
+
+window.addEventListener("pageshow", () => {
+    try {
+        const key = "favorite-scroll:" + location.pathname + location.search;
+        const savedPosition = sessionStorage.getItem(key);
+        sessionStorage.removeItem(key);
+        if (savedPosition !== null && Number.isFinite(Number(savedPosition))) {
+            requestAnimationFrame(() => window.scrollTo({top: Number(savedPosition), behavior: "instant"}));
+        }
+    } catch {
+        // Без sessionStorage зберігається стандартна поведінка браузера.
+    }
+});

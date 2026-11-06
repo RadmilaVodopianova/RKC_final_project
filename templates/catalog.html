@@ -97,6 +97,11 @@
                         action="{% url 'toggle_favorite' product.pk %}"
                         method="post"
                         class="favorite-form"
+                        data-favorite-form
+                        data-product-id="{{ product.pk }}"
+                        data-product-name="{{ product.name }}"
+                        data-filled-icon="{% static 'images/heart-filled.png' %}"
+                        data-outline-icon="{% static 'images/heart-outline.png' %}"
                     >
                         {% csrf_token %}
 
@@ -108,7 +113,8 @@
 
                         <button
                             type="submit"
-                            class="favorite-button"
+                            class="favorite-button{% if product.pk in favorite_product_ids %} is-favorite{% endif %}"
+                            aria-pressed="{% if product.pk in favorite_product_ids %}true{% else %}false{% endif %}"
                             title="{% if product.pk in favorite_product_ids %}Видалити з обраного{% else %}Додати до обраного{% endif %}"
                             aria-label="{% if product.pk in favorite_product_ids %}Видалити з обраного{% else %}Додати до обраного{% endif %}: {{ product.name }}"
                         >

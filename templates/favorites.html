@@ -15,12 +15,13 @@
             до свого списку обраного.
         </p>
 
-        <div class="catalog-products">
+        <div class="catalog-products" data-favorites-list>
 
             {% for item in favorite_items %}
 
                 <article
                     class="product-card"
+                    data-favorite-card
                     style="position: relative;"
                 >
 
@@ -29,6 +30,11 @@
                         action="{% url 'toggle_favorite' item.product.pk %}"
                         method="post"
                         class="favorite-form"
+                        data-favorite-form
+                        data-product-id="{{ item.product.pk }}"
+                        data-product-name="{{ item.product.name }}"
+                        data-filled-icon="{% static 'images/heart-filled.png' %}"
+                        data-outline-icon="{% static 'images/heart-outline.png' %}"
                         style="position: absolute; top: 12px; right: 12px; left: auto; z-index: 10; margin: 0;"
                     >
                         {% csrf_token %}
@@ -42,6 +48,7 @@
                         <button
                             type="submit"
                             class="favorite-button is-favorite"
+                            aria-pressed="true"
                             style="width: 42px; height: 42px; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #eadfd3; background: white; cursor: pointer;"
                             title="Видалити з обраного"
                             aria-label="Видалити з обраного: {{ item.product.name }}"
@@ -94,9 +101,9 @@
 
                 </article>
 
-            {% empty %}
+            {% endfor %}
 
-                <div class="catalog-empty">
+                <div class="catalog-empty" data-favorites-empty{% if favorite_items %} hidden{% endif %}>
                     <h2>Поки що немає обраних товарів</h2>
 
                     <p>
@@ -111,8 +118,6 @@
                         Перейти до каталогу
                     </a>
                 </div>
-
-            {% endfor %}
 
         </div>
 
