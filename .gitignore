@@ -34,3 +34,6 @@ staticfiles/
 .coverage
 .coverage.*
 htmlcov/
+
+# Оригінали фото каталогу зберігаються окремо від історії коду.
+/media/products/
